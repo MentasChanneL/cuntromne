@@ -14,7 +14,7 @@ public class DeagleFire extends Script {
             if(this.data.ammo < 1) { close();return false; }
             this.data.ammo--;
             this.data.player.setCooldown(this.data.item.getType(), 12);
-            ProjectileCreator.createBullet(this.data.player.getEyeLocation(), this.data.player.getUniqueId(), 10);
+            ProjectileCreator.createBullet(this.data.player.getEyeLocation(), this.data.player.getUniqueId(), 12);
             this.animation = Animations.animations.get("deagle.fire");
             this.data.player.getWorld().playSound(this.data.player.getLocation(), "ctum:weapon.deagle.fire", 4, (float) 0.9);
             this.frame = 0;

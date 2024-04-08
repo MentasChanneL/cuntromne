@@ -31,6 +31,7 @@ public final class Cuntromne extends JavaPlugin {
         this.saveDefaultConfig();
         this.saveResource("knifes.yml", false);
         Animations.initAnimates();
+        TextFormatter.init();
         this.ct = new Team("ct", "Контрононисты");
         this.t = new Team("t", "Экскремисты");
         Bukkit.getPluginManager().registerEvents(new Events(this), this);

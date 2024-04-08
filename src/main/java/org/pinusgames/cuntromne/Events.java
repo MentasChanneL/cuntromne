@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -244,6 +245,41 @@ public class Events implements Listener {
                 return;
             }
             location.getWorld().playSound(location, "ctum:player.ct.hurt" + (new Random().nextInt(4) + 1), 1, 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void playerKill(EntityDamageByEntityEvent e) {
+        if(!(e.getEntity() instanceof Player) || !(e.getDamager() instanceof Player)) return;
+        Player victim = (Player) e.getEntity();
+        Player damager = (Player) e.getDamager();
+        if(!Round.teamList.containsKey(victim.getUniqueId()) || !Round.teamList.containsKey(damager.getUniqueId())) return;
+        String id1 = Round.teamList.get(victim.getUniqueId()).id;
+        String id2 = Round.teamList.get(damager.getUniqueId()).id;
+        if(id1.equals(id2)) {
+            Shop.addCash(damager, (int)e.getDamage() * 2 * -1);
+            damager.showTitle(Title.title(
+                    Component.text("ТЫ ЧЕ"),
+                    Component.text("Зочем ранил союзника?"),
+                    Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(0))
+            ));
+            if(victim.getHealth() - e.getDamage() <= 0) {
+                Bukkit.broadcast(
+                        damager.displayName()
+                                .append(Component.text(" и "))
+                                .append(victim.displayName())
+                                .append(Component.text(" жёско засосались со слюнями"))
+                );
+            }
+            return;
+        }
+        if(victim.getHealth() - e.getDamage() <= 0) {
+            Shop.addCash(damager, 4);
+            Bukkit.broadcast(
+              damager.displayName()
+                      .append(Component.text(" трахаль "))
+                      .append(victim.displayName())
+            );
         }
     }
 

@@ -1,6 +1,8 @@
 package org.pinusgames.cuntromne;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -35,6 +37,10 @@ public class Round {
     public static int bombTimer;
     public static int CTWins;
     public static int TWins;
+    public static int CTcount;
+    public static int Tcount;
+
+    public static net.kyori.adventure.bossbar.BossBar mansBossbar = net.kyori.adventure.bossbar.BossBar.bossBar(Component.text(), 1, net.kyori.adventure.bossbar.BossBar.Color.WHITE, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
 
     public static void newGame() {
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
@@ -45,7 +51,10 @@ public class Round {
         CTWins = 0;
         TWins = 0;
         roundID = 0;
+        Tcount = 0;
+        CTcount = 0;
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
+            mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
         for(UUID target : new HashSet<>( teamList.keySet() )) {
@@ -56,16 +65,21 @@ public class Round {
             Shop.money.put(player.getUniqueId(), 8);
             Team team = teamList.get(target);
             if(team.id.equals("ct")) {
+                CTcount++;
+                mansBossbar.addViewer(player);
                 bossbar.addPlayer(player);
                 player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
             if(team.id.equals("t")) {
+                Tcount++;
+                mansBossbar.addViewer(player);
                 bossbar.addPlayer(player);
                 player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
         }
+        bossbarTxtCreator();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
     }
 
@@ -75,8 +89,11 @@ public class Round {
         timeLeft = 2400;
         prepareLeft = 300;
         bombTimer = -1;
+        Tcount = 0;
+        CTcount = 0;
         roundID++;
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
+            mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
         for(UUID target : new HashSet<>( teamList.keySet() )) {
@@ -84,16 +101,21 @@ public class Round {
             if( player == null || !player.isValid() ) {teamList.remove(target); continue;}
             Team team = teamList.get(target);
             if(team.id.equals("ct")) {
+                CTcount++;
+                mansBossbar.addViewer(player);
                 bossbar.addPlayer(player);
                 player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
             if(team.id.equals("t")) {
+                Tcount++;
+                mansBossbar.addViewer(player);
                 bossbar.addPlayer(player);
                 player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
         }
+        bossbarTxtCreator();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
     }
 
@@ -103,14 +125,14 @@ public class Round {
         ItemStack knife = Knife.getKnife(player.getUniqueId());
         if(!chest.hasItemMeta() || !chest.getItemMeta().hasCustomModelData() ) {
             if(knife != null) {
-                player.getInventory().setItem(3, knife);
+                player.getInventory().setItem(2, knife);
             }
             if(team.id.equals("ct")) {
-                if(knife == null) player.getInventory().setItem(3, org.pinusgames.cuntromne.weapon.Knife.give(player, 1001));
+                if(knife == null) player.getInventory().setItem(2, org.pinusgames.cuntromne.weapon.Knife.give(player, 1001));
                 player.getInventory().setItem(EquipmentSlot.CHEST, Armor.giveStock( Color.fromRGB(50, 50, 250) ));
             }
             if(team.id.equals("t")) {
-                if(knife == null) player.getInventory().setItem(3, org.pinusgames.cuntromne.weapon.Knife.give(player, 1000));
+                if(knife == null) player.getInventory().setItem(2, org.pinusgames.cuntromne.weapon.Knife.give(player, 1000));
                 player.getInventory().setItem(EquipmentSlot.CHEST, Armor.giveStock( Color.fromRGB(250, 125, 0) ));
             }
         }
@@ -124,15 +146,22 @@ public class Round {
     }
 
     private static void tick() {
+        bossbar();
         if(Round.prepareLeft > 0) {
-            bossbar.setProgress((double) prepareLeft / 300);
 
-            String display = String.valueOf(prepareLeft / 20 );
-            if(display.length() < 2) display = "0" + display;
-            bossbar.setTitle("00:" + display);
+            for(Player player : selectInGame()) {
+                player.sendActionBar(
+                        Component.text("Нажмите ")
+                                .append(Component.keybind("key.swapOffhand").color(TextColor.color(255, 223, 18)))
+                                .append(Component.text(" для закупа.").color(TextColor.color(255, 255, 255)))
+                );
+            }
 
             Round.prepareLeft--;
             if(Round.prepareLeft == 0) {
+                for(Player player : selectInGame()) {
+                    player.sendActionBar(Component.text(""));
+                }
                 List<Player> team = Round.getTeam("t");
                 if(!team.isEmpty()) {
                     Player random = team.get( new Random().nextInt(team.size()) );
@@ -149,17 +178,6 @@ public class Round {
             return;
         }
         if(Round.timeLeft > 0) {
-            bossbar.setProgress((double) timeLeft / 2400);
-
-            int seconds = timeLeft / 20;
-            int minutes = seconds / 60;
-            seconds = seconds - (minutes * 60);
-            String sd = String.valueOf(seconds);
-            String dm = String.valueOf(minutes);
-            if(seconds < 10) sd = "0" + sd;
-            if(minutes < 10) dm = "0" + dm;
-            bossbar.setTitle(dm + ":" + sd);
-
             Round.timeLeft--;
             if(timeLeft == 0 && Round.bombTimer != -3) {
                 ctwin();
@@ -170,6 +188,9 @@ public class Round {
     }
 
     public static void endTrigger() {
+        CTcount = sortAlive(Round.getTeam("ct")).size();
+        Tcount = sortAlive(Round.getTeam("t")).size();
+        bossbarTxtCreator();
         if(Round.bombTimer == -3) return;
         if(Round.bombTimer == -2) { twin(); return;}
         List<Player> ctlist = sortAlive( getTeam("ct") ) ;
@@ -249,6 +270,39 @@ public class Round {
                     Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(5), Duration.ofSeconds(0))
             ));
         }
+    }
+
+    private static void bossbar() {
+        if(Round.prepareLeft > 0) {
+            String display = String.valueOf(prepareLeft / 20);
+            if (display.length() < 2) display = "0" + display;
+            bossbar.setTitle("00:" + display);
+            return;
+        }
+        if(Round.timeLeft > 0) {
+            int seconds = timeLeft / 20;
+            int minutes = seconds / 60;
+            seconds = seconds - (minutes * 60);
+            String sd = String.valueOf(seconds);
+            String dm = String.valueOf(minutes);
+            if(seconds < 10) sd = "0" + sd;
+            if(minutes < 10) dm = "0" + dm;
+            bossbar.setTitle(dm + ":" + sd);
+        }
+    }
+
+    private static void bossbarTxtCreator() {
+        StringBuilder c = new StringBuilder();
+        for(int i = 0; i < CTcount; i++) {
+            c.append("1");
+        }
+        Component title = Component.text(c.toString()).font(Key.key("ctum:icons"));
+        c = new StringBuilder();
+        for(int i = 0; i < Tcount; i++) {
+            c.append("2");
+        }
+        title = title.append(Component.text("                       ").font(Key.key("minecraft:default"))).append(Component.text(c.toString()).font(Key.key("ctum:icons")));
+        mansBossbar.name(title);
     }
 
     public static List<Player> getTeam(String id) {

@@ -43,10 +43,24 @@ public class Shop {
             money.put(player.getUniqueId(), 0);
         }
         setMan(player);
+        player.playSound(player.getLocation(), "ctum:shop.open", 1, 1);
         player.openInventory(menu);
     }
 
     public static void addCash(Player player, int count) {
+        if(count < 0) {
+            player.sendMessage(Component.text("Вы оштрафованны на " + count)
+                    .append(Component.text("6").font(Key.key("ctum:icons")))
+                    .append(Component.text("(дубовых листьев)!").font(Key.key("minecraft:default")))
+                    .color(TextColor.color(255, 70, 12))
+            );
+        }else{
+            player.sendMessage(Component.text("Вам зачисленно " + count)
+                    .append(Component.text("6").font(Key.key("ctum:icons")))
+                    .append(Component.text("(дубовых листьев)!").font(Key.key("minecraft:default")))
+                    .color(TextColor.color(100, 255, 0))
+            );
+        }
         if(!money.containsKey(player.getUniqueId())) { money.put(player.getUniqueId(), count); return; }
         int balance = money.get( player.getUniqueId() );
         balance = balance + count;
@@ -55,6 +69,7 @@ public class Shop {
 
     public static void close(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
+        player.playSound(player.getLocation(), "ctum:shop.close", 1, 1);
         player.getInventory().setItem(10, null);
     }
 
@@ -78,8 +93,8 @@ public class Shop {
         giveMap.put(32, new Give(0, "m4a1"));
         giveMap.put(34, new Give(0, "awp"));
         giveMap.put(46, new Give(38, "armor"));
-        giveMap.put(48, new Give(3, "he"));
-        giveMap.put(50, new Give(2, "flash"));
+        giveMap.put(48, new Give(4, "he"));
+        giveMap.put(50, new Give(3, "flash"));
         //giveMap.put(52, new Give(4));
         menu.setItem(12, getShopItem(650, 2));
         menu.setItem(14, getShopItem(651, 3));
@@ -93,7 +108,7 @@ public class Shop {
     }
 
     private static ItemStack getShopItem(int customModelData, int price) {
-        ItemStack result = new ItemStack(Material.STICK);
+        ItemStack result = new ItemStack(Material.SNOWBALL);
         ItemMeta meta = result.getItemMeta();
         meta.setCustomModelData(customModelData);
         List<Component> components = new ArrayList<>();
@@ -143,7 +158,7 @@ public class Shop {
 
             if(meta != null && meta.hasCustomModelData() && meta.getCustomModelData() == 1) {
                 if(team.id.equals("t")) {
-                    ItemStack result = new ItemStack(Material.STICK);
+                    ItemStack result = new ItemStack(Material.SNOWBALL);
                     ItemMeta resMeta = result.getItemMeta();
                     resMeta.setCustomModelData(693);
                     resMeta.displayName(Component.text("репис"));
@@ -151,7 +166,7 @@ public class Shop {
                     player.getInventory().setItem(10, result);
                 }
                 if(team.id.equals("ct")) {
-                    ItemStack result = new ItemStack(Material.STICK);
+                    ItemStack result = new ItemStack(Material.SNOWBALL);
                     ItemMeta resMeta = result.getItemMeta();
                     resMeta.setCustomModelData(691);
                     resMeta.displayName(Component.text("репис"));
@@ -162,7 +177,7 @@ public class Shop {
             }
 
             if(team.id.equals("t")) {
-                ItemStack result = new ItemStack(Material.STICK);
+                ItemStack result = new ItemStack(Material.SNOWBALL);
                 ItemMeta resMeta = result.getItemMeta();
                 resMeta.setCustomModelData(692);
                 resMeta.displayName(Component.text("репис"));
@@ -170,7 +185,7 @@ public class Shop {
                 player.getInventory().setItem(10, result);
             }
             if(team.id.equals("ct")) {
-                ItemStack result = new ItemStack(Material.STICK);
+                ItemStack result = new ItemStack(Material.SNOWBALL);
                 ItemMeta resMeta = result.getItemMeta();
                 resMeta.setCustomModelData(690);
                 resMeta.displayName(Component.text("репис"));
