@@ -1,0 +1,17 @@
+name: cuntromne
+version: '${project.version}'
+main: org.pinusgames.cuntromne.Cuntromne
+api-version: '1.20'
+commands:
+  giveweapon:
+    permission: op
+  ctumteam:
+    permission: op
+  action:
+    permission: op
+  config:
+    permission: op
+  round:
+    permission: op
+  cash:
+    permission: op
