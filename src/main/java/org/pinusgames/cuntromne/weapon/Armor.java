@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,7 +23,7 @@ public class Armor {
     public static ItemStack give(Player player) {
         ItemStack result = new ItemStack(Material.LEATHER_CHESTPLATE);
         LeatherArmorMeta meta = (LeatherArmorMeta) result.getItemMeta();
-        meta.setCustomModelData(150);
+        meta.setCustomModelData(1);
         meta.displayName(Component.text("люди привет я влад").decoration(TextDecoration.ITALIC, false));
         meta.lore(Arrays.asList(
                 Component.text("я из 4 класса каждый бень меня").decoration(TextDecoration.ITALIC, false),
@@ -48,4 +49,17 @@ public class Armor {
         result.setItemMeta(meta);
         return result;
     }
+
+    public static ItemStack giveStock(Color color) {
+        ItemStack armor = new ItemStack(Material.LEATHER_CHESTPLATE);
+        LeatherArmorMeta meta = (LeatherArmorMeta) armor.getItemMeta();
+        meta.displayName(Component.text(""));
+        meta.setCustomModelData(2);
+        meta.setColor(color);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 0, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
+        armor.setItemMeta(meta);
+        return armor;
+    }
+
 }

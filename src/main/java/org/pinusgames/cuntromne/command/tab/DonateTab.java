@@ -6,20 +6,20 @@ import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class RoundTab implements TabCompleter {
+public class DonateTab implements TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        List<String> result = new ArrayList<>();
-        if(args.length == 1) {
-            result.add("start");
-            result.add("newgame");
-            result.add("pause");
-            result.add("stop");
-            return result;
+
+        if(args.length == 2) {
+            return Arrays.asList("knife", "tabskin");
         }
+        if(args.length == 3 && args[1].equals("knife")) {
+            return Arrays.asList("1000", "1001", "...");
+        }
+
         return null;
     }
 }

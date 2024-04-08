@@ -98,7 +98,7 @@ public class ProjectileCreator {
                     if(!Look.wayIsClear(player.getEyeLocation(), target.getLocation())) continue;
                     player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, false, false));
                     player.showTitle(Title.title(
-                            Component.text(new Random().nextInt(3)).font(Key.key("ctum:flash")),
+                            Component.text(new Random().nextInt(8)).font(Key.key("ctum:flash")),
                             Component.text(")").font(Key.key("ctum:intro")),
                             Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(2), Duration.ofSeconds(1))
                     ));

@@ -1,6 +1,9 @@
 package org.pinusgames.cuntromne;
 
 import io.papermc.paper.event.entity.EntityMoveEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -32,6 +35,7 @@ import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileType;
 
+import java.time.Duration;
 import java.util.*;
 
 public class Events implements Listener {
@@ -221,6 +225,7 @@ public class Events implements Listener {
     public void onDamage(EntityDamageEvent e) {
         if(!(e.getEntity() instanceof Player)) return;
         Player target = (Player) e.getEntity();
+        if(target.getGameMode() == GameMode.SPECTATOR) {e.setCancelled(true); return;}
         if(!Round.teamList.containsKey( target.getUniqueId() )) return;
         Team team = Round.teamList.get( target.getUniqueId() );
         if(team.id.equals("t")) {
@@ -240,6 +245,24 @@ public class Events implements Listener {
             }
             location.getWorld().playSound(location, "ctum:player.ct.hurt" + (new Random().nextInt(4) + 1), 1, 1);
         }
+    }
+
+    @EventHandler
+    public void death(EntityDeathEvent e) {
+        if(!(e.getEntity() instanceof Player)) return;
+        Player target = (Player) e.getEntity();
+        if(target.getGameMode() == GameMode.SPECTATOR) {e.setCancelled(true); return;}
+        if(!Round.teamList.containsKey( target.getUniqueId() )) return;
+        e.setCancelled(true);
+        target.setGameMode(GameMode.SPECTATOR);
+        target.showTitle(Title.title(
+                Component.text(""),
+                Component.text("вы умер :("),
+                Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))
+        ));
+        target.getInventory().clear();
+        target.setItemOnCursor(null);
+        Round.endTrigger();
     }
 
     @EventHandler

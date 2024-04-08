@@ -4,10 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pinusgames.cuntromne.command.*;
-import org.pinusgames.cuntromne.command.tab.ActionTab;
-import org.pinusgames.cuntromne.command.tab.ConfigTab;
-import org.pinusgames.cuntromne.command.tab.Givewptab;
-import org.pinusgames.cuntromne.command.tab.RoundTab;
+import org.pinusgames.cuntromne.command.tab.*;
 import org.pinusgames.cuntromne.weapon.WeaponData;
 import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.script.Animations;
@@ -32,6 +29,7 @@ public final class Cuntromne extends JavaPlugin {
         instance = this;
         this.config = new Config(this);
         this.saveDefaultConfig();
+        this.saveResource("knifes.yml", false);
         Animations.initAnimates();
         this.ct = new Team("ct", "Контрононисты");
         this.t = new Team("t", "Экскремисты");
@@ -43,11 +41,13 @@ public final class Cuntromne extends JavaPlugin {
         this.getCommand("config").setExecutor(new ConfigCommand());
         this.getCommand("round").setExecutor(new RoundCommand());
         this.getCommand("cash").setExecutor(new CashCommand());
+        this.getCommand("donate").setExecutor(new DonateCommand());
 
         this.getCommand("giveweapon").setTabCompleter(new Givewptab());
         this.getCommand("action").setTabCompleter(new ActionTab());
         this.getCommand("config").setTabCompleter(new ConfigTab());
         this.getCommand("round").setTabCompleter(new RoundTab());
+        this.getCommand("donate").setTabCompleter(new DonateTab());
     }
 
     @Override

@@ -15,3 +15,5 @@ commands:
     permission: op
   cash:
     permission: op
+  donate:
+    permission: op

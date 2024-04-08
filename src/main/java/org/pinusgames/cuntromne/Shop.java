@@ -16,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.pinusgames.cuntromne.utils.NBTEditor;
 import org.pinusgames.cuntromne.weapon.*;
 
 import java.util.ArrayList;
@@ -43,6 +44,13 @@ public class Shop {
         }
         setMan(player);
         player.openInventory(menu);
+    }
+
+    public static void addCash(Player player, int count) {
+        if(!money.containsKey(player.getUniqueId())) { money.put(player.getUniqueId(), count); return; }
+        int balance = money.get( player.getUniqueId() );
+        balance = balance + count;
+        money.put(player.getUniqueId(), balance);
     }
 
     public static void close(InventoryCloseEvent event) {
@@ -122,6 +130,7 @@ public class Shop {
             balance -= price;
             money.put(player.getUniqueId(), balance);
             giveMap.get(slot).give(player);
+            setMan(player);
             player.playSound(player.getLocation(), "ctum:round", 1, 0.9F);
         }
     }
@@ -168,8 +177,6 @@ public class Shop {
                 result.setItemMeta(resMeta);
                 player.getInventory().setItem(10, result);
             }
-
-            return;
         }
     }
 
@@ -184,6 +191,8 @@ public class Shop {
         }
 
         public void give(Player player) {
+            int oldSlot = player.getInventory().getHeldItemSlot();
+            int newSlot = 8;
             player.getInventory().setHeldItemSlot(8);
             ItemStack give = null;
             if(item.equals("ak")) give = Ak47.give(player);
@@ -200,8 +209,24 @@ public class Shop {
             }
             player.getInventory().setItem(slot, give);
             if(slot < 9) {
+                newSlot = slot;
                 player.getInventory().setHeldItemSlot(slot);
             }
+
+            ItemStack newW = player.getInventory().getItem( newSlot );
+            ItemStack oldW = player.getInventory().getItem( oldSlot );
+            Object tag = NBTEditor.getItemTag(newW, "cunt-weaponid");
+            if(tag != null && Cuntromne.getInstance().weapons.containsKey( (int) tag )) {
+                int id = (int) tag;
+                Bukkit.getScheduler().runTask(Cuntromne.getInstance(), () -> {
+                    Cuntromne.getInstance().weapons.get(id).intro();
+                });
+            }
+            tag = NBTEditor.getItemTag(oldW, "cunt-weaponid");
+            if(tag != null && Cuntromne.getInstance().weapons.containsKey( (int) tag )) {
+                Cuntromne.getInstance().weapons.get( (int) tag ).outro();
+            }
+
         }
     }
 
