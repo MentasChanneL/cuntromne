@@ -113,6 +113,19 @@ public class ProjectileCreator {
         return bullet;
     }
 
+    public static Snowball createSMOKE(Location location, UUID owner, int damage) {
+        Snowball bullet = (Snowball) location.getWorld().spawnEntity(location, EntityType.SNOWBALL);
+        bullet.setVelocity(location.getDirection());
+        ItemStack item = new ItemStack(Material.STICK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(604);
+        item.setItemMeta(meta);
+        Cuntromne.getInstance().projectiles.put(bullet.getUniqueId(), new Projectile(System.currentTimeMillis(), owner, damage, bullet.getUniqueId(), ProjectileType.GRENADE_SMOKE, 0));
+        bullet.setItem(item);
+        bullet.setShooter(Bukkit.getPlayer(owner));
+        return bullet;
+    }
+
     public static Snowball cloneGrenade(Location location, Projectile data) {
         Snowball bullet = (Snowball) location.getWorld().spawnEntity(location, EntityType.SNOWBALL);
         bullet.setVelocity(location.getDirection());

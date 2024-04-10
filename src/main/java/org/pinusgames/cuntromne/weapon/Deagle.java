@@ -65,7 +65,7 @@ public class Deagle implements WeaponActions{
         ItemStack result = new ItemStack(Material.STICK);
         ItemMeta meta = result.getItemMeta();
         meta.setCustomModelData(150);
-        meta.displayName(Component.text("ЗАЖИМ ЯЙЦАМИ").decoration(TextDecoration.ITALIC, false));
+        meta.displayName(Component.text("подходит сотый и загадывает, чтобы все опять стали черными").decoration(TextDecoration.ITALIC, false));
         result.setItemMeta(meta);
         int id = Cuntromne.getInstance().getWeaponID();
         WeaponData data = new WeaponData(new Deagle(), result, 7, 35, id);

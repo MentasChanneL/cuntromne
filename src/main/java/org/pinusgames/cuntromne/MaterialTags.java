@@ -33,4 +33,12 @@ public class MaterialTags {
             Material.PODZOL,
             Material.BASALT
     ) );
+
+    public static final Set<Material> smokeWhiteList = new HashSet<>( Arrays.asList(
+            Material.AIR,
+            Material.CAVE_AIR,
+            Material.VOID_AIR,
+            Material.IRON_BARS,
+            Material.GRASS
+    ) );
 }

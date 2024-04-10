@@ -1,17 +1,13 @@
 package org.pinusgames.cuntromne;
 
-import io.papermc.paper.event.entity.EntityMoveEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,18 +16,17 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.pinusgames.cuntromne.actions.ActionChain;
 import org.pinusgames.cuntromne.actions.IntroAction;
 import org.pinusgames.cuntromne.actions.JoinAction;
 import org.pinusgames.cuntromne.actions.LobbyAction;
 import org.pinusgames.cuntromne.utils.NBTEditor;
+import org.pinusgames.cuntromne.utils.SmokeBlock;
 import org.pinusgames.cuntromne.weapon.Explode;
+import org.pinusgames.cuntromne.weapon.GrenadeSmoke;
 import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileType;
@@ -57,6 +52,7 @@ public class Events implements Listener {
 
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
+        e.getPlayer().setCustomChatCompletions(Arrays.asList("ಧ", "ನ", "బ", "భ"));
         e.getPlayer().teleport( Config.login );
         Bukkit.getScheduler().runTaskLater(instance, () -> {
             ActionChain.runActionChain(e.getPlayer(), new JoinAction(), new IntroAction(), new LobbyAction());
@@ -156,7 +152,7 @@ public class Events implements Listener {
             Snowball newP = ProjectileCreator.cloneGrenade(loc, data);
             newP.setVelocity(new Vector(0, 0, 0));
             LivingEntity live = (LivingEntity) e.getHitEntity();
-            live.damage(1, Bukkit.getPlayer(data.owner));
+            if(live != null) { live.damage(1, Bukkit.getPlayer(data.owner)); }
             e.getEntity().remove();
             return;
         }
@@ -177,7 +173,35 @@ public class Events implements Listener {
             Snowball newP = ProjectileCreator.cloneGrenade(loc, data);
             newP.setVelocity(new Vector(0, 0, 0));
             LivingEntity live = (LivingEntity) e.getHitEntity();
-            live.damage(1, Bukkit.getPlayer(data.owner));
+            if(live != null) { live.damage(1, Bukkit.getPlayer(data.owner)); }
+            e.getEntity().remove();
+            return;
+        }
+
+        if(data.type == ProjectileType.GRENADE_SMOKE) {
+            data.data++;
+            Location loc = e.getEntity().getLocation();
+            if(data.data > 5) {
+                SmokeBlock.createSmoke(126, loc);
+                loc.getWorld().playSound(loc, "ctum:weapon.smoke", 1, 1);
+                e.getEntity().remove();
+                return;
+            }
+            loc.getWorld().playSound(loc, "ctum:weapon.flash.hit", 1, 0.9F);
+            if(e.getHitBlock() != null) {
+                Vector face = e.getHitBlockFace().getDirection();
+                Vector move = e.getEntity().getVelocity();
+                double dot = move.dot(face);
+                Vector reflected = move.subtract(face.multiply(2 * dot));
+                Snowball newP = ProjectileCreator.cloneGrenade(loc, data);
+                newP.setVelocity(reflected.multiply(0.65));
+                e.getEntity().remove();
+                return;
+            }
+            Snowball newP = ProjectileCreator.cloneGrenade(loc, data);
+            newP.setVelocity(new Vector(0, 0, 0));
+            LivingEntity live = (LivingEntity) e.getHitEntity();
+            if(live != null) { live.damage(1, Bukkit.getPlayer(data.owner)); }
             e.getEntity().remove();
             return;
         }
