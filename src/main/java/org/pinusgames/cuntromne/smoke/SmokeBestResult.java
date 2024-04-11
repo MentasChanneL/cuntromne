@@ -1,4 +1,4 @@
-package org.pinusgames.cuntromne.utils;
+package org.pinusgames.cuntromne.smoke;
 
 import org.bukkit.Location;
 

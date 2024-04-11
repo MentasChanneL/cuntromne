@@ -2,20 +2,15 @@ package org.pinusgames.cuntromne.weapon;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pinusgames.cuntromne.Cuntromne;
 import org.pinusgames.cuntromne.utils.NBTEditor;
-import org.pinusgames.cuntromne.utils.SmokeBlock;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.script.Script;
-
-import java.util.HashMap;
 
 public class GrenadeSmoke implements WeaponActions{
 
