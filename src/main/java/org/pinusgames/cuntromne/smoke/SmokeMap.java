@@ -23,6 +23,10 @@ public class SmokeMap {
         this.values.set(index, value);
     }
 
+    public void remove(SmokeVector key) {
+
+    }
+
     public SmokeBlock get(SmokeVector key) {
         int index = contains(key);
         return values.get(index);

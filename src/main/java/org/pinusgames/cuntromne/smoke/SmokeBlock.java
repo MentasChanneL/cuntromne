@@ -3,8 +3,10 @@ package org.pinusgames.cuntromne.smoke;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Transformation;
@@ -15,25 +17,28 @@ import org.pinusgames.cuntromne.Cuntromne;
 import org.pinusgames.cuntromne.MaterialTags;
 import org.pinusgames.cuntromne.utils.Timer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class SmokeBlock {
     public boolean hasAir;
     public int members;
     public Location location;
+    public SmokeVector vector;
 
-    public SmokeBlock(boolean hasAir, int members, Location location) {
+    public static Set<ItemDisplay> visuals = new HashSet<>();
+    public static Set<Player> inSmoke = new HashSet<>();
+
+    public SmokeBlock(boolean hasAir, int members, Location location, SmokeVector vector) {
         this.hasAir = hasAir;
         this.members = members;
         this.location = location;
+        this.vector = vector;
     }
 
     public static void createSmoke(int size, Location position, ItemStack item) {
         int i = 0;
         SmokeMap blocks = new SmokeMap();
-        List<ItemDisplay> visuals = new ArrayList<>();
+        HashMap<ItemDisplay, SmokeBlock> visuals = new HashMap<>();
         main: while(i < size) {
             i++;
             Location current = position.clone().toCenterLocation();
@@ -49,8 +54,10 @@ public class SmokeBlock {
                 }
                 if (result.type == SmokeBestType.OPEN_HERE) {
                     SmokeBlock newBlock = getSmokeBlock(blocks, result.move);
-                    blocks.put(new SmokeVector(result.move.toVector()), newBlock);
-                    visuals.add( createVisual(result.move, (int)(i * (20d / size)), item) );
+                    SmokeVector newVector = new SmokeVector(result.move.toVector());
+                    newBlock.vector = newVector;
+                    blocks.put(newVector, newBlock);
+                    visuals.put( createVisual(result.move, (int)(i * (20d / size)), item), newBlock );
                     break;
                 }
             }
@@ -58,7 +65,7 @@ public class SmokeBlock {
         }
 
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), () -> {
-            for(ItemDisplay display : visuals) {
+            for(ItemDisplay display : visuals.keySet()) {
 
                 float rollRad = (float) Math.toRadians(Math.random() * 360);
                 float pitchRad = (float) Math.toRadians(Math.random() * 360);
@@ -88,10 +95,10 @@ public class SmokeBlock {
             ItemStack stick = new ItemStack(Material.STICK);
             ItemMeta meta = stick.getItemMeta();
             meta.setCustomModelData(606);
-            new Timer(() -> {
+            Timer.forInterval(() -> {
                 meta.setCustomModelData(meta.getCustomModelData() + 1);
                 stick.setItemMeta(meta);
-                for (ItemDisplay display : visuals) {
+                for (ItemDisplay display : visuals.keySet()) {
                     if (display.isValid()) {
                         display.setItemStack(stick);
                     }
@@ -100,8 +107,10 @@ public class SmokeBlock {
 
 
             Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), () -> {
-                for(ItemDisplay display : visuals) {
+                for(ItemDisplay display : new HashSet<>(visuals.keySet())) {
                     if(display.isValid()) {
+                        blocks.remove( visuals.get(display).vector );
+                        visuals.remove(display);
                         display.remove();
                     }
                 }
@@ -145,7 +154,7 @@ public class SmokeBlock {
                 current.clone().add(0, -1, 0)
 
         );
-        SmokeBlock result = new SmokeBlock(false, 0, current);
+        SmokeBlock result = new SmokeBlock(false, 0, current, null);
         for(Location locMember : members) {
             SmokeVector member = new SmokeVector( locMember.toVector() );
             if( MaterialTags.smokeWhiteList.contains( locMember.getBlock().getType() ) ) {
@@ -173,6 +182,7 @@ public class SmokeBlock {
         result.setInterpolationDelay(delay);
         result.setInterpolationDuration(10);
         result.setItemStack(item);
+        visuals.add(result);
 
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), () -> {
 
@@ -198,6 +208,14 @@ public class SmokeBlock {
         }, 10 + delay);
 
         return result;
+    }
+
+    public static boolean SmokeIsNearby(Location location) {
+        for (Entity entity : location.getNearbyEntities( 1.2, 1.2, 1.2)) {
+            if(!(entity instanceof ItemDisplay)) continue;
+            if(SmokeBlock.visuals.contains( (ItemDisplay) entity)) return true;
+        }
+        return false;
     }
 
 }

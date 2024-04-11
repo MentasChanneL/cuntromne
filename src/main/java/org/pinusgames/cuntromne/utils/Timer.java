@@ -5,7 +5,7 @@ import org.pinusgames.cuntromne.Cuntromne;
 
 public class Timer {
 
-    public Timer(Runnable run, int count, int interval) {
+    public static void forInterval(Runnable run, int count, int interval) {
         int i = 0;
         while(i < count){
             i++;

@@ -2,21 +2,17 @@ package org.pinusgames.cuntromne;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.pinusgames.cuntromne.donate.Knife;
@@ -33,7 +29,10 @@ public class Round {
     public static int timeLeft;
     public static int prepareLeft;
     public static HashMap<UUID, Team> teamList = new HashMap<>();
+    public static Set<Player> lobby = new HashSet<>();
+    public static HashMap<Player, Component> actionBars = new HashMap<>();
     public static int schedulerTimer = -1;
+    public static int schedulerActionbar = -1;
     public static int bombTimer;
     public static int CTWins;
     public static int TWins;
@@ -41,6 +40,7 @@ public class Round {
     public static int Tcount;
 
     public static net.kyori.adventure.bossbar.BossBar mansBossbar = net.kyori.adventure.bossbar.BossBar.bossBar(Component.text(), 1, net.kyori.adventure.bossbar.BossBar.Color.WHITE, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
+    public static net.kyori.adventure.bossbar.BossBar scoreBossbar = net.kyori.adventure.bossbar.BossBar.bossBar(Component.text(), 1, net.kyori.adventure.bossbar.BossBar.Color.WHITE, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
 
     public static void newGame() {
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
@@ -53,7 +53,10 @@ public class Round {
         roundID = 0;
         Tcount = 0;
         CTcount = 0;
+        lobbyDist();
+        setScoreBossbar();
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
+            scoreBossbar.removeViewer( bossbar.getPlayers().get(i) );
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
@@ -64,22 +67,23 @@ public class Round {
             player.setItemOnCursor(null);
             Shop.money.put(player.getUniqueId(), 8);
             Team team = teamList.get(target);
+            mansBossbar.addViewer(player);
+            bossbar.addPlayer(player);
+            scoreBossbar.addViewer(player);
             if(team.id.equals("ct")) {
                 CTcount++;
-                mansBossbar.addViewer(player);
-                bossbar.addPlayer(player);
                 player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
             if(team.id.equals("t")) {
                 Tcount++;
-                mansBossbar.addViewer(player);
-                bossbar.addPlayer(player);
                 player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
         }
         bossbarTxtCreator();
+        actionBarReset();
+        schedulerActionbar = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::actionBarTick, 1, 1 ).getTaskId();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
     }
 
@@ -92,7 +96,10 @@ public class Round {
         Tcount = 0;
         CTcount = 0;
         roundID++;
+        lobbyDist();
+        setScoreBossbar();
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
+            scoreBossbar.removeViewer( bossbar.getPlayers().get(i) );
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
@@ -100,23 +107,48 @@ public class Round {
             Player player = Bukkit.getPlayer(target);
             if( player == null || !player.isValid() ) {teamList.remove(target); continue;}
             Team team = teamList.get(target);
+            mansBossbar.addViewer(player);
+            bossbar.addPlayer(player);
+            scoreBossbar.addViewer(player);
             if(team.id.equals("ct")) {
                 CTcount++;
-                mansBossbar.addViewer(player);
-                bossbar.addPlayer(player);
                 player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
             if(team.id.equals("t")) {
                 Tcount++;
-                mansBossbar.addViewer(player);
-                bossbar.addPlayer(player);
                 player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
                 preparePlayer(player);
             }
         }
+        actionBarReset();
         bossbarTxtCreator();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
+    }
+
+    private static void setScoreBossbar() {
+        scoreBossbar.name(
+                Component.text(CTWins).color(TextColor.color(0, 100, 255))
+                        .font(Key.key("ctum:round"))
+                        .append(Component.text(" ").font(Key.key("minecraft:default")))
+                        .append(Component.text("/").color(TextColor.color(255, 255, 255)).font(Key.key("ctum:round")))
+                        .append(Component.text(" ").font(Key.key("minecraft:default")))
+                        .append(Component.text(TWins).color(TextColor.color(255, 100, 0)).font(Key.key("ctum:round")))
+        );
+    }
+
+    private static void lobbyDist() {
+        for(Player player : lobby) {
+            int countT = Round.getTeam("t").size();
+            int countCT = Round.getTeam("ct").size();
+            if(countCT < countT || countCT == countT) {
+                teamList.put(player.getUniqueId(), Cuntromne.getInstance().ct);
+            }
+            if(countCT > countT) {
+                teamList.put(player.getUniqueId(), Cuntromne.getInstance().t);
+            }
+        }
+        lobby.clear();
     }
 
     private static void preparePlayer(Player player) {
@@ -303,6 +335,17 @@ public class Round {
         }
         title = title.append(Component.text("                       ").font(Key.key("minecraft:default"))).append(Component.text(c.toString()).font(Key.key("ctum:icons")));
         mansBossbar.name(title);
+    }
+
+    private static void actionBarTick() {
+        for(Player player : actionBars.keySet()) {
+            player.sendActionBar( actionBars.get(player) );
+        }
+    }
+    private static void actionBarReset() {
+        for(Player player : new HashSet<>(actionBars.keySet())) {
+            actionBars.put(player, Component.text(""));
+        }
     }
 
     public static List<Player> getTeam(String id) {

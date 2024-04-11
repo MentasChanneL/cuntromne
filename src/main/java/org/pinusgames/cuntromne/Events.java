@@ -19,6 +19,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.pinusgames.cuntromne.actions.ActionChain;
 import org.pinusgames.cuntromne.actions.IntroAction;
@@ -31,8 +33,10 @@ import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileType;
 
+import java.awt.*;
 import java.time.Duration;
 import java.util.*;
+import java.util.List;
 
 public class Events implements Listener {
 
@@ -47,11 +51,24 @@ public class Events implements Listener {
     public void playerMove(PlayerMoveEvent e) {
         if(blockMove.contains(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
+            return;
+        }
+        Player player = e.getPlayer();
+        if(SmokeBlock.SmokeIsNearby(player.getEyeLocation())) {
+            if (!SmokeBlock.inSmoke.contains(player)) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, PotionEffect.INFINITE_DURATION, 0, false, false));
+                SmokeBlock.inSmoke.add(player);
+            }
+        }else if(SmokeBlock.inSmoke.contains(player)) {
+            player.removePotionEffect(PotionEffectType.DARKNESS);
+            SmokeBlock.inSmoke.remove(player);
         }
     }
 
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
+        Cuntromne.hideNickTeam.addPlayer(e.getPlayer());
+        Round.actionBars.put(e.getPlayer(), Component.text(""));
         e.getPlayer().setCustomChatCompletions(Arrays.asList("ಧ", "ನ", "బ", "భ"));
         e.getPlayer().teleport( Config.login );
         Bukkit.getScheduler().runTaskLater(instance, () -> {
@@ -365,6 +382,28 @@ public class Events implements Listener {
     @EventHandler
     public void saturation(FoodLevelChangeEvent e) {
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void shift(PlayerToggleSneakEvent e) {
+        Player p = e.getPlayer();
+        ItemStack weapon = p.getInventory().getItemInMainHand();
+        Object tag = NBTEditor.getItemTag(weapon, "cunt-weaponid");
+        if (tag == null) return;
+        int id = (int) tag;
+        if (!this.instance.weapons.containsKey(id)) return;
+        e.setCancelled(true);
+        e.getPlayer().setSneaking( e.isSneaking() );
+        this.instance.weapons.get(id).shift();
+    }
+
+    @EventHandler
+    public void leave(PlayerQuitEvent e) {
+        System.out.println("- " + e.getPlayer().getName());
+        Round.teamList.remove(e.getPlayer().getUniqueId());
+        Round.lobby.remove(e.getPlayer());
+        Round.actionBars.remove(e.getPlayer());
+        Round.endTrigger();
     }
 
 }

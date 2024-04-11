@@ -6,7 +6,7 @@ import org.pinusgames.cuntromne.Config;
 import org.pinusgames.cuntromne.Events;
 import org.pinusgames.cuntromne.Round;
 
-public class LobbyAction implements Action{
+public class LostAction implements Action{
 
     private ActionResult result;
     private Player player;

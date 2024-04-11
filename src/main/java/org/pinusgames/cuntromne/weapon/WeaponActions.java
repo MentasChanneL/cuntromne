@@ -8,5 +8,6 @@ public interface WeaponActions {
     void intro(WeaponData data);
     void outro(WeaponData data);
     void review(WeaponData data);
+    void shift(WeaponData data);
     Script getScript();
 }

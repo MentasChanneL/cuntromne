@@ -17,3 +17,5 @@ commands:
     permission: op
   donate:
     permission: op
+  sex:
+    permission: default

@@ -27,5 +27,6 @@ public class WeaponData {
     public void intro() {this.actions.intro(this);}
     public void outro() {this.actions.outro(this);}
     public void review() {this.actions.review(this);}
+    public void shift() {this.actions.shift(this);}
 
 }

@@ -44,6 +44,11 @@ public class Tester implements WeaponActions{
     public void review(WeaponData data) {}
 
     @Override
+    public void shift(WeaponData data) {
+
+    }
+
+    @Override
     public Script getScript() {
         return this.script;
     }

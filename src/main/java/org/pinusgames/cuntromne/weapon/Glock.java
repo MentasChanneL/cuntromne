@@ -60,6 +60,11 @@ public class Glock implements WeaponActions{
     }
 
     @Override
+    public void shift(WeaponData data) {
+
+    }
+
+    @Override
     public Script getScript() {
         return this.script;
     }

@@ -43,6 +43,11 @@ public class GrenadeFlash implements WeaponActions{
     }
 
     @Override
+    public void shift(WeaponData data) {
+
+    }
+
+    @Override
     public Script getScript() {
         return null;
     }

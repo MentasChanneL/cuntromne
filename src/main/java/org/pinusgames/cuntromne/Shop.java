@@ -84,7 +84,7 @@ public class Shop {
         cost.put(46, 10);
         cost.put(48, 4);
         cost.put(50, 3);
-        //cost.put(52, 3);
+        cost.put(52, 3);
         giveMap = new HashMap<>();
         giveMap.put(12, new Give(1, "glock"));
         giveMap.put(14, new Give(1, "usp"));
@@ -95,7 +95,7 @@ public class Shop {
         giveMap.put(46, new Give(38, "armor"));
         giveMap.put(48, new Give(4, "he"));
         giveMap.put(50, new Give(3, "flash"));
-        //giveMap.put(52, new Give(4));
+        giveMap.put(52, new Give(5, "smoke"));
         menu.setItem(12, getShopItem(650, 2));
         menu.setItem(14, getShopItem(651, 3));
         menu.setItem(16, getShopItem(652, 8));
@@ -105,6 +105,7 @@ public class Shop {
         menu.setItem(46, getShopItem(659, 10));
         menu.setItem(48, getShopItem(656, 4));
         menu.setItem(50, getShopItem(657, 3));
+        menu.setItem(52, getShopItem(658, 3));
     }
 
     private static ItemStack getShopItem(int customModelData, int price) {
@@ -218,6 +219,8 @@ public class Shop {
             if(item.equals("tester")) give = Tester.give(player);
             if(item.equals("he")) give = GrenadeHE.give(player);
             if(item.equals("flash")) give = GrenadeFlash.give(player);
+            if(item.equals("smoke")) give = GrenadeSmoke.give(player);
+            if(item.equals("usp")) give = USP.give(player);
             if(item.equals("armor")) {
                 give = Armor.give(player);
                 player.getWorld().playSound(player.getLocation(), "ctum:armor", 1, 1);

@@ -34,6 +34,11 @@ public class M4A1 implements WeaponActions{
     }
 
     @Override
+    public void shift(WeaponData data) {
+
+    }
+
+    @Override
     public void intro(WeaponData data) {
         try{ script.close(); } catch (Exception ignore) {}
         this.script = new M4A1Intro();

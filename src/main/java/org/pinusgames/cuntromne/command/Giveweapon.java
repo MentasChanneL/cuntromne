@@ -26,6 +26,7 @@ public class Giveweapon implements CommandExecutor {
             if(args[1].equals("he")) give = GrenadeHE.give(player);
             if(args[1].equals("flash")) give = GrenadeFlash.give(player);
             if(args[1].equals("smoke")) give = GrenadeSmoke.give(player);
+            if(args[1].equals("usp")) give = USP.give(player);
             if(args[1].equals("knife") && args.length > 2) {
                 give = Knife.give(player, Integer.parseInt(args[2]));
             }

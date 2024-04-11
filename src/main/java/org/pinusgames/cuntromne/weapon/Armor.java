@@ -45,7 +45,7 @@ public class Armor {
         }
         meta.setColor(color);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
-        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 8, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 10, AttributeModifier.Operation.ADD_NUMBER));
         result.setItemMeta(meta);
         return result;
     }

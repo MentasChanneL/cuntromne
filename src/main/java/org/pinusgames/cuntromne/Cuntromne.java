@@ -1,8 +1,8 @@
 package org.pinusgames.cuntromne;
 
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
 import org.pinusgames.cuntromne.command.*;
 import org.pinusgames.cuntromne.command.tab.*;
 import org.pinusgames.cuntromne.weapon.WeaponData;
@@ -15,17 +15,24 @@ public final class Cuntromne extends JavaPlugin {
 
     public HashMap<Integer, WeaponData> weapons = new HashMap<>();
     public HashMap<UUID, Projectile> projectiles = new HashMap<>();
-    public HashMap<UUID, Team> teamList = new HashMap<>();
     private static Cuntromne instance;
     private int WeaponID = 0;
-    public final Set<Integer> tasks = new HashSet<>();
     public Config config;
+
+    public static org.bukkit.scoreboard.Team hideNickTeam;
 
     public Team ct;
     public Team t;
 
     @Override
     public void onEnable() {
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        hideNickTeam = scoreboard.getTeam("hide");
+
+        if (hideNickTeam == null) {
+            hideNickTeam = scoreboard.registerNewTeam("hide");
+        }
+        hideNickTeam.setOption(org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY, org.bukkit.scoreboard.Team.OptionStatus.NEVER);
         instance = this;
         this.config = new Config(this);
         this.saveDefaultConfig();
