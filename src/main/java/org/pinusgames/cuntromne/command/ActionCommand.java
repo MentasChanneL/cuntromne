@@ -6,10 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.pinusgames.cuntromne.actions.Action;
-import org.pinusgames.cuntromne.actions.IntroAction;
-import org.pinusgames.cuntromne.actions.JoinAction;
-import org.pinusgames.cuntromne.actions.LobbyAction;
+import org.pinusgames.cuntromne.actions.*;
 
 public class ActionCommand implements CommandExecutor {
     @Override
@@ -22,6 +19,8 @@ public class ActionCommand implements CommandExecutor {
             if(args[1].equals("intro")) action = new IntroAction();
             if(args[1].equals("join")) action = new JoinAction();
             if(args[1].equals("lobby")) action = new LobbyAction();
+            if(args[1].equals("lost")) action = new LostAction();
+            if(args[1].equals("win")) action = new WinAction();
             if(action == null) return false;
             action.run(player);
         }

@@ -1,6 +1,8 @@
 package org.pinusgames.cuntromne.weapon.script.ak;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.script.Animations;
 import org.pinusgames.cuntromne.weapon.script.Script;
@@ -14,6 +16,7 @@ public class AkFire extends Script {
             if(this.data.ammo < 1) { close();return false; }
             this.data.ammo--;
             this.data.player.setCooldown(this.data.item.getType(), 4);
+            Round.setAB(this.data.player, Component.text("☰ " + this.data.ammo + " / " + this.data.ammoContainer));
             ProjectileCreator.createBullet(this.data.player.getEyeLocation(), this.data.player.getUniqueId(), 7);
             this.animation = Animations.animations.get("ak.fire");
             this.data.player.getWorld().playSound(this.data.player.getLocation(), "ctum:weapon.ak.fire", 4, 1);

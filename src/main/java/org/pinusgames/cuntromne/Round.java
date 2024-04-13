@@ -15,6 +15,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.pinusgames.cuntromne.actions.Action;
+import org.pinusgames.cuntromne.actions.LostAction;
+import org.pinusgames.cuntromne.actions.WinAction;
 import org.pinusgames.cuntromne.donate.Knife;
 import org.pinusgames.cuntromne.weapon.Armor;
 
@@ -33,11 +36,13 @@ public class Round {
     public static HashMap<Player, Component> actionBars = new HashMap<>();
     public static int schedulerTimer = -1;
     public static int schedulerActionbar = -1;
-    public static int bombTimer;
+    public static int bombTimer = -3;
     public static int CTWins;
     public static int TWins;
     public static int CTcount;
     public static int Tcount;
+    public static boolean endGameEvent = false;
+    public static Team winTeam;
 
     public static net.kyori.adventure.bossbar.BossBar mansBossbar = net.kyori.adventure.bossbar.BossBar.bossBar(Component.text(), 1, net.kyori.adventure.bossbar.BossBar.Color.WHITE, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
     public static net.kyori.adventure.bossbar.BossBar scoreBossbar = net.kyori.adventure.bossbar.BossBar.bossBar(Component.text(), 1, net.kyori.adventure.bossbar.BossBar.Color.WHITE, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
@@ -152,6 +157,7 @@ public class Round {
     }
 
     private static void preparePlayer(Player player) {
+        Events.blockMove.add(player.getUniqueId());
         Team team = Round.teamList.get(player.getUniqueId());
         ItemStack chest = player.getInventory().getItem(EquipmentSlot.CHEST);
         ItemStack knife = Knife.getKnife(player.getUniqueId());
@@ -192,6 +198,7 @@ public class Round {
             Round.prepareLeft--;
             if(Round.prepareLeft == 0) {
                 for(Player player : selectInGame()) {
+                    Events.blockMove.remove(player.getUniqueId());
                     player.sendActionBar(Component.text(""));
                 }
                 List<Player> team = Round.getTeam("t");
@@ -246,6 +253,49 @@ public class Round {
         }
     }
 
+    private static void endGame() {
+        if(CTWins > 15 || TWins > 15) {
+            Round.bombTimer = -3;
+            Round.endGameEvent = true;
+            Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
+            if(CTWins > TWins) {
+                Round.winTeam = Cuntromne.getInstance().ct;
+                for(Player player : getTeam("t")) {
+                    Action action = new LostAction();
+                    action.run(player);
+                }
+                for(Player player : getTeam("ct")) {
+                    Action action = new WinAction();
+                    action.run(player);
+                }
+            }
+            if(CTWins < TWins) {
+                Round.winTeam = Cuntromne.getInstance().t;
+                for(Player player : getTeam("ct")) {
+                    Action action = new LostAction();
+                    action.run(player);
+                }
+                for(Player player : getTeam("t")) {
+                    Action action = new WinAction();
+                    action.run(player);
+                }
+            }
+            Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), () -> {
+                for (Player player : selectInGame()) {
+                    setAB(player, Component.text(""));
+                }
+                List<Player> sufle = selectInGame();
+                Collections.shuffle(sufle);
+                Round.lobby.addAll( sufle );
+                Round.teamList.clear();
+                Round.endGameEvent = false;
+                newGame();
+            }, 200);
+            return;
+        }
+        newRound();
+    }
+
     private static void twin() {
         Round.bombTimer = -3;
         Round.TWins++;
@@ -255,7 +305,7 @@ public class Round {
         for(Player player : getTeam("ct")) {
             Shop.addCash(player, 10);
         }
-        Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::newRound, 100);
+        Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
         for(Player player : selectInGame()) {
             player.showTitle(Title.title(
                     Component.text("Экскремисты").color(TextColor.color(255, 150, 0)),
@@ -274,7 +324,7 @@ public class Round {
         for(Player player : getTeam("t")) {
             Shop.addCash(player, 10);
         }
-        Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::newRound, 100);
+        Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
         for(Player player : selectInGame()) {
             player.showTitle(Title.title(
                     Component.text("Контрононисты").color(TextColor.color(0, 50, 255)),
@@ -346,6 +396,10 @@ public class Round {
         for(Player player : new HashSet<>(actionBars.keySet())) {
             actionBars.put(player, Component.text(""));
         }
+    }
+
+    public static void setAB(Player player, Component component) {
+        actionBars.put(player, component);
     }
 
     public static List<Player> getTeam(String id) {

@@ -2,6 +2,8 @@ package org.pinusgames.cuntromne.actions;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -10,7 +12,9 @@ import org.pinusgames.cuntromne.Cuntromne;
 import org.pinusgames.cuntromne.Events;
 import org.pinusgames.cuntromne.Round;
 
-public class LostAction implements Action{
+import java.time.Duration;
+
+public class WinAction implements Action{
 
     private ActionResult result;
     private Player player;
@@ -29,12 +33,18 @@ public class LostAction implements Action{
         this.player.setGameMode(GameMode.SPECTATOR);
         this.player.setHealth(20);
         this.player.setSaturation(20);
-        this.player.playSound(this.player.getLocation(), "ctum:lost", 1, 1);
-        Round.setAB(this.player, Component.text("7").font(Key.key("ctum:icons")));
+        this.player.playSound(this.player.getLocation(), "ctum:win", 1, 1);
+        Round.setAB(this.player, Component.text("8").font(Key.key("ctum:icons")));
         Events.blockMove.add(this.player.getUniqueId());
 
         int repeat = Bukkit.getScheduler().runTaskTimer(Cuntromne.getInstance(), () -> {
             if(!player.isValid()) cancel(ActionResult.BAD_END);
+            this.player.showTitle(Title.title(
+                    Component.text(""),
+                    Component.keybind("key.swapOffhand").color(TextColor.color(255, 200, 0))
+                            .append(Component.text(", чтобы посмеятся над лузерами")),
+                    Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(2))
+            ));
         },1,5).getTaskId();
 
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), () -> {

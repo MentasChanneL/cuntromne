@@ -17,6 +17,8 @@ public class ActionTab implements TabCompleter {
             result.add("intro");
             result.add("join");
             result.add("lobby");
+            result.add("lost");
+            result.add("win");
             return result;
         }
         return null;

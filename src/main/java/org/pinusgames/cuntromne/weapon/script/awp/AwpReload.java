@@ -1,6 +1,8 @@
 package org.pinusgames.cuntromne.weapon.script.awp;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.script.Animations;
 import org.pinusgames.cuntromne.weapon.script.Script;
 
@@ -31,6 +33,7 @@ public class AwpReload extends Script {
                 this.data.ammo += need;
             }
             this.data.player.setCooldown(this.data.item.getType(), 0);
+            Round.setAB(this.data.player, Component.text("☰ " + this.data.ammo + " / " + this.data.ammoContainer));
             close();
             return false;
         }

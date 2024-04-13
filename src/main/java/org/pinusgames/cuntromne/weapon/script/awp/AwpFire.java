@@ -1,7 +1,9 @@
 package org.pinusgames.cuntromne.weapon.script.awp;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
+import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.script.Animations;
 import org.pinusgames.cuntromne.weapon.script.Script;
@@ -17,6 +19,7 @@ public class AwpFire extends Script {
             this.next = true;
             if(this.data.ammo < 1) { close();return false; }
             this.data.ammo--;
+            Round.setAB(this.data.player, Component.text("☰ " + this.data.ammo + " / " + this.data.ammoContainer));
             Vector vector = this.data.player.getEyeLocation().getDirection();
             this.data.player.setVelocity( this.data.player.getVelocity().add( vector.multiply(-1) ) );
             this.data.player.setCooldown(this.data.item.getType(), 35);

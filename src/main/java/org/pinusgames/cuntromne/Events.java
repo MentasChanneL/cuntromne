@@ -1,5 +1,6 @@
 package org.pinusgames.cuntromne;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
@@ -104,6 +105,24 @@ public class Events implements Listener {
 
     @EventHandler
     public void switchHand(PlayerSwapHandItemsEvent e) {
+        if(Round.endGameEvent) {
+            if(Round.teamList.containsKey( e.getPlayer().getUniqueId() )) return;
+            if(Round.winTeam.id.equals( Round.teamList.get( e.getPlayer().getUniqueId() ).id )) {
+                e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:taunt", 0.4F, 1);
+                for(Player player : Round.selectInGame()) {
+                    if(!Round.winTeam.id.equals( Round.teamList.get( player.getUniqueId() ).id )) {
+                        player.playSound(player.getLocation(), "ctum:taunt", 1, 1);
+                        player.showTitle( Title.title(
+                                Component.text("4").font(Key.key("ctum:icons"))
+                                        .append( Component.text("   ").font(Key.key("minecraft:default")) ),
+                                Component.text(""),
+                                Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(0), Duration.ofSeconds(20))
+                        ));
+                    }
+                }
+            }
+            return;
+        }
         Player p = e.getPlayer();
         if(Round.prepareLeft > 0) {
             e.setCancelled(true);
@@ -125,16 +144,15 @@ public class Events implements Listener {
         Player p = e.getPlayer();
         ItemStack newW = p.getInventory().getItem( e.getNewSlot() );
         ItemStack oldW = p.getInventory().getItem( e.getPreviousSlot() );
-        Object tag = NBTEditor.getItemTag(newW, "cunt-weaponid");
-        if(tag != null && this.instance.weapons.containsKey( (int) tag )) {
-            int id = (int) tag;
-            Bukkit.getScheduler().runTask(this.instance, () -> {
-                this.instance.weapons.get(id).intro();
-            });
-        }
-        tag = NBTEditor.getItemTag(oldW, "cunt-weaponid");
+        Object tag = NBTEditor.getItemTag(oldW, "cunt-weaponid");
         if(tag != null && this.instance.weapons.containsKey( (int) tag )) {
             this.instance.weapons.get( (int) tag ).outro();
+        }
+        Round.actionBars.put(e.getPlayer(), Component.text(""));
+        tag = NBTEditor.getItemTag(newW, "cunt-weaponid");
+        if(tag != null && this.instance.weapons.containsKey( (int) tag )) {
+            int id = (int) tag;
+            Bukkit.getScheduler().runTask(this.instance, () -> this.instance.weapons.get(id).intro());
         }
     }
     @EventHandler
