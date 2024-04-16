@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.pinusgames.cuntromne.Cuntromne;
+import org.pinusgames.cuntromne.PlayerData;
 import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.Team;
 import org.pinusgames.cuntromne.utils.NBTEditor;
@@ -38,11 +39,11 @@ public class Armor {
                 Component.text("аллергия на селетку папа сказал").decoration(TextDecoration.ITALIC, false)
         ));
         Color color = Color.fromRGB(255, 255, 255);
-        if(Round.teamList.containsKey(player.getUniqueId())) {
-            Team team = Round.teamList.get( player.getUniqueId() );
-            if(team.id.equals("t")) color = Color.fromRGB(255, 125, 0);
-            if(team.id.equals("ct")) color = Color.fromRGB(50, 50, 255);
-        }
+
+        Team team = PlayerData.get(player).team;
+        if(team.id.equals("t")) color = Color.fromRGB(255, 125, 0);
+        if(team.id.equals("ct")) color = Color.fromRGB(50, 50, 255);
+
         meta.setColor(color);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
         meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 10, AttributeModifier.Operation.ADD_NUMBER));
@@ -53,7 +54,7 @@ public class Armor {
     public static ItemStack giveStock(Color color) {
         ItemStack armor = new ItemStack(Material.LEATHER_CHESTPLATE);
         LeatherArmorMeta meta = (LeatherArmorMeta) armor.getItemMeta();
-        meta.displayName(Component.text(""));
+        meta.displayName(Component.text("клянусь, что отсосу маршу за сникерс. Прочитал? Выполняй. "));
         meta.setCustomModelData(2);
         meta.setColor(color);
         meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 0, AttributeModifier.Operation.ADD_NUMBER));

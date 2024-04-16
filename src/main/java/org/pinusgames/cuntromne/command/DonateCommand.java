@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -12,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.pinusgames.cuntromne.Cuntromne;
 
 import java.io.File;
-import java.io.FileReader;
 
 public class DonateCommand implements CommandExecutor {
     @Override

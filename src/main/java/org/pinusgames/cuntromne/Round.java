@@ -10,7 +10,9 @@ import org.bukkit.GameMode;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -31,16 +33,10 @@ public class Round {
 
     public static int timeLeft;
     public static int prepareLeft;
-    public static HashMap<UUID, Team> teamList = new HashMap<>();
-    public static Set<Player> lobby = new HashSet<>();
     public static HashMap<Player, Component> actionBars = new HashMap<>();
     public static int schedulerTimer = -1;
     public static int schedulerActionbar = -1;
     public static int bombTimer = -3;
-    public static int CTWins;
-    public static int TWins;
-    public static int CTcount;
-    public static int Tcount;
     public static boolean endGameEvent = false;
     public static Team winTeam;
 
@@ -53,11 +49,9 @@ public class Round {
         timeLeft = 2400;
         prepareLeft = 300;
         bombTimer = -1;
-        CTWins = 0;
-        TWins = 0;
+        Team.teamList.get("ct").wins = 0;
+        Team.teamList.get("t").wins = 0;
         roundID = 0;
-        Tcount = 0;
-        CTcount = 0;
         lobbyDist();
         setScoreBossbar();
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
@@ -65,26 +59,25 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(UUID target : new HashSet<>( teamList.keySet() )) {
-            Player player = Bukkit.getPlayer(target);
-            if( player == null || !player.isValid() ) {teamList.remove(target); continue;}
+        for(Player player : Team.teamList.get("ct").members) {
             player.getInventory().clear();
             player.setItemOnCursor(null);
             Shop.money.put(player.getUniqueId(), 8);
-            Team team = teamList.get(target);
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
-            if(team.id.equals("ct")) {
-                CTcount++;
-                player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-                preparePlayer(player);
-            }
-            if(team.id.equals("t")) {
-                Tcount++;
-                player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-                preparePlayer(player);
-            }
+            player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+            preparePlayer(player);
+        }
+        for(Player player : Team.teamList.get("t").members) {
+            player.getInventory().clear();
+            player.setItemOnCursor(null);
+            Shop.money.put(player.getUniqueId(), 8);
+            mansBossbar.addViewer(player);
+            bossbar.addPlayer(player);
+            scoreBossbar.addViewer(player);
+            player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+            preparePlayer(player);
         }
         bossbarTxtCreator();
         actionBarReset();
@@ -93,13 +86,15 @@ public class Round {
     }
 
     public static void newRound() {
+        if(Bukkit.getOnlinePlayers().isEmpty()) return;
+        for(Entity t : Config.ctspawn.getWorld().getEntities()) {
+            if(t instanceof Snowball) t.remove();
+        }
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
         bossbar.setVisible(true);
         timeLeft = 2400;
         prepareLeft = 300;
         bombTimer = -1;
-        Tcount = 0;
-        CTcount = 0;
         roundID++;
         lobbyDist();
         setScoreBossbar();
@@ -108,23 +103,19 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(UUID target : new HashSet<>( teamList.keySet() )) {
-            Player player = Bukkit.getPlayer(target);
-            if( player == null || !player.isValid() ) {teamList.remove(target); continue;}
-            Team team = teamList.get(target);
+        for(Player player : Team.teamList.get("ct").members) {
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
-            if(team.id.equals("ct")) {
-                CTcount++;
-                player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-                preparePlayer(player);
-            }
-            if(team.id.equals("t")) {
-                Tcount++;
-                player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-                preparePlayer(player);
-            }
+            player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+            preparePlayer(player);
+        }
+        for(Player player : Team.teamList.get("t").members) {
+            mansBossbar.addViewer(player);
+            bossbar.addPlayer(player);
+            scoreBossbar.addViewer(player);
+            player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+            preparePlayer(player);
         }
         actionBarReset();
         bossbarTxtCreator();
@@ -133,32 +124,33 @@ public class Round {
 
     private static void setScoreBossbar() {
         scoreBossbar.name(
-                Component.text(CTWins).color(TextColor.color(0, 100, 255))
+                Component.text(Team.teamList.get("ct").wins).color(TextColor.color(0, 100, 255))
                         .font(Key.key("ctum:round"))
                         .append(Component.text(" ").font(Key.key("minecraft:default")))
                         .append(Component.text("/").color(TextColor.color(255, 255, 255)).font(Key.key("ctum:round")))
                         .append(Component.text(" ").font(Key.key("minecraft:default")))
-                        .append(Component.text(TWins).color(TextColor.color(255, 100, 0)).font(Key.key("ctum:round")))
+                        .append(Component.text(Team.teamList.get("t").wins).color(TextColor.color(255, 100, 0)).font(Key.key("ctum:round")))
         );
     }
 
     private static void lobbyDist() {
-        for(Player player : lobby) {
-            int countT = Round.getTeam("t").size();
-            int countCT = Round.getTeam("ct").size();
-            if(countCT < countT || countCT == countT) {
-                teamList.put(player.getUniqueId(), Cuntromne.getInstance().ct);
+        Team t = Team.teamList.get("t");
+        Team ct = Team.teamList.get("ct");
+        for(Player player : Team.teamList.get("spectator").members) {
+            if(ct.getMembersCount() < t.getMembersCount() || ct.getMembersCount() == t.getMembersCount()) {
+                ct.addMember(player);
+                continue;
             }
-            if(countCT > countT) {
-                teamList.put(player.getUniqueId(), Cuntromne.getInstance().t);
+            if(ct.getMembersCount() > t.getMembersCount()) {
+                t.addMember(player);
             }
         }
-        lobby.clear();
+        Team.teamList.get("spectator").members.clear();
     }
 
     private static void preparePlayer(Player player) {
         Events.blockMove.add(player.getUniqueId());
-        Team team = Round.teamList.get(player.getUniqueId());
+        Team team = PlayerData.get(player).team;
         ItemStack chest = player.getInventory().getItem(EquipmentSlot.CHEST);
         ItemStack knife = Knife.getKnife(player.getUniqueId());
         if(!chest.hasItemMeta() || !chest.getItemMeta().hasCustomModelData() ) {
@@ -201,15 +193,15 @@ public class Round {
                     Events.blockMove.remove(player.getUniqueId());
                     player.sendActionBar(Component.text(""));
                 }
-                List<Player> team = Round.getTeam("t");
-                if(!team.isEmpty()) {
-                    Player random = team.get( new Random().nextInt(team.size()) );
+                Team team = Team.teamList.get("t");
+                if(!team.members.isEmpty()) {
+                    Player random = team.getMember( new Random().nextInt(team.members.size()) );
                     Team.teamMessage("t", random.displayName().color(TextColor.color(255, 125, 0)).append(Component.text(" : Пошли!" )));
                     random.getLocation().getWorld().playSound(random.getLocation(), "ctum:player.t.battlecry" + (new Random().nextInt(4) + 1), 1, 1);
                 }
-                team = Round.getTeam("ct");
-                if(!team.isEmpty()) {
-                    Player random = team.get( new Random().nextInt(team.size()) );
+                team = Team.teamList.get("ct");
+                if(!team.members.isEmpty()) {
+                    Player random = team.getMember( new Random().nextInt(team.members.size()) );
                     Team.teamMessage("ct", random.displayName().color(TextColor.color(50, 50, 255)).append(Component.text(" : За работу!" )));
                     random.getLocation().getWorld().playSound(random.getLocation(), "ctum:player.ct.battlecry" + (new Random().nextInt(4) + 1), 1, 1);
                 }
@@ -227,19 +219,17 @@ public class Round {
     }
 
     public static void endTrigger() {
-        CTcount = sortAlive(Round.getTeam("ct")).size();
-        Tcount = sortAlive(Round.getTeam("t")).size();
         bossbarTxtCreator();
         if(Round.bombTimer == -3) return;
         if(Round.bombTimer == -2) { twin(); return;}
-        List<Player> ctlist = sortAlive( getTeam("ct") ) ;
+        Set<Player> ctlist = Team.teamList.get("ct").getAliveMembers() ;
         if(Round.bombTimer > -1) {
             if(!ctlist.isEmpty()) {
                 twin();
                 return;
             }
         }
-        List<Player> tlist = sortAlive( getTeam("t") );
+        Set<Player> tlist = Team.teamList.get("t").getAliveMembers();
         if(ctlist.isEmpty() && tlist.isEmpty()) {
             noone();
             return;
@@ -254,28 +244,30 @@ public class Round {
     }
 
     private static void endGame() {
-        if(CTWins > 15 || TWins > 15) {
+        Team ct = Team.teamList.get("ct");
+        Team t = Team.teamList.get("t");
+        if(ct.wins > 15 || t.wins > 15) {
             Round.bombTimer = -3;
             Round.endGameEvent = true;
             Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
-            if(CTWins > TWins) {
-                Round.winTeam = Cuntromne.getInstance().ct;
-                for(Player player : getTeam("t")) {
+            if(ct.wins > t.wins) {
+                Round.winTeam = ct;
+                for(Player player :  t.members) {
                     Action action = new LostAction();
                     action.run(player);
                 }
-                for(Player player : getTeam("ct")) {
+                for(Player player : ct.members) {
                     Action action = new WinAction();
                     action.run(player);
                 }
             }
-            if(CTWins < TWins) {
-                Round.winTeam = Cuntromne.getInstance().t;
-                for(Player player : getTeam("ct")) {
+            if(ct.wins < t.wins) {
+                Round.winTeam = t;
+                for(Player player : ct.members) {
                     Action action = new LostAction();
                     action.run(player);
                 }
-                for(Player player : getTeam("t")) {
+                for(Player player : t.members) {
                     Action action = new WinAction();
                     action.run(player);
                 }
@@ -286,8 +278,7 @@ public class Round {
                 }
                 List<Player> sufle = selectInGame();
                 Collections.shuffle(sufle);
-                Round.lobby.addAll( sufle );
-                Round.teamList.clear();
+                Team.teamList.get("spectator").addMembers(sufle);
                 Round.endGameEvent = false;
                 newGame();
             }, 200);
@@ -297,12 +288,14 @@ public class Round {
     }
 
     private static void twin() {
+        Team ct = Team.teamList.get("ct");
+        Team t = Team.teamList.get("t");
         Round.bombTimer = -3;
-        Round.TWins++;
-        for(Player player : getTeam("t")) {
+        t.wins++;
+        for(Player player : t.members) {
             Shop.addCash(player, 15);
         }
-        for(Player player : getTeam("ct")) {
+        for(Player player : ct.members) {
             Shop.addCash(player, 10);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
@@ -316,12 +309,14 @@ public class Round {
     }
 
     private static void ctwin() {
+        Team ct = Team.teamList.get("ct");
+        Team t = Team.teamList.get("t");
         Round.bombTimer = -3;
-        Round.CTWins++;
-        for(Player player : getTeam("ct")) {
+        ct.wins++;
+        for(Player player : ct.members) {
             Shop.addCash(player, 15);
         }
-        for(Player player : getTeam("t")) {
+        for(Player player : t.members) {
             Shop.addCash(player, 10);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
@@ -335,13 +330,15 @@ public class Round {
     }
 
     private static void noone() {
+        Team ct = Team.teamList.get("ct");
+        Team t = Team.teamList.get("t");
         Round.bombTimer = -3;
-        Round.CTWins++;
-        Round.TWins++;
-        for(Player player : getTeam("ct")) {
+        ct.wins++;
+        t.wins++;
+        for(Player player : ct.members) {
             Shop.addCash(player, 12);
         }
-        for(Player player : getTeam("t")) {
+        for(Player player : t.members) {
             Shop.addCash(player, 12);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::newRound, 100);
@@ -374,13 +371,15 @@ public class Round {
     }
 
     private static void bossbarTxtCreator() {
+        Team ct = Team.teamList.get("ct");
+        Team t = Team.teamList.get("t");
         StringBuilder c = new StringBuilder();
-        for(int i = 0; i < CTcount; i++) {
+        for(int i = 0; i < ct.getMembersCount(); i++) {
             c.append("1");
         }
         Component title = Component.text(c.toString()).font(Key.key("ctum:icons"));
         c = new StringBuilder();
-        for(int i = 0; i < Tcount; i++) {
+        for(int i = 0; i < t.getMembersCount(); i++) {
             c.append("2");
         }
         title = title.append(Component.text("                       ").font(Key.key("minecraft:default"))).append(Component.text(c.toString()).font(Key.key("ctum:icons")));
@@ -402,39 +401,11 @@ public class Round {
         actionBars.put(player, component);
     }
 
-    public static List<Player> getTeam(String id) {
-        List<Player> players = new ArrayList<>();
-        for(UUID uuid : new HashSet<>(Round.teamList.keySet())) {
-            Player player = Bukkit.getPlayer(uuid);
-            if(player == null) {
-                Round.teamList.remove(uuid);
-                continue;
-            }
-            Team pteam = Round.teamList.get(uuid);
-            if(pteam.id.equals(id)) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
     public static List<Player> selectInGame() {
         List<Player> players = new ArrayList<>();
-        for(UUID uuid : new HashSet<>(Round.teamList.keySet())) {
-            Player player = Bukkit.getPlayer(uuid);
-            if(player == null) {
-                Round.teamList.remove(uuid);
-                continue;
-            }
-            players.add(player);
-        }
-        return players;
-    }
-    public static List<Player> sortAlive(List<Player> get) {
-        List<Player> players = new ArrayList<>();
-        for(Player player : get) {
-            if(player.getGameMode() == GameMode.ADVENTURE) {
-                players.add(player);
-            }
+        for(Team team : Team.teamList.values()) {
+            if(team.id.equals("spectator")) continue;
+            players.addAll(team.members);
         }
         return players;
     }

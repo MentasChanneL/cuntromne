@@ -16,6 +16,8 @@ public class RoundTab implements TabCompleter {
         if(args.length == 1) {
             result.add("start");
             result.add("newgame");
+            result.add("endgameT");
+            result.add("endgameCT");
             result.add("pause");
             result.add("stop");
             return result;

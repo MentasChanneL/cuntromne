@@ -13,4 +13,8 @@ public class Timer {
         }
     }
 
+    public static void runLater(Runnable run, int time) {
+        Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), run, time);
+    }
+
 }

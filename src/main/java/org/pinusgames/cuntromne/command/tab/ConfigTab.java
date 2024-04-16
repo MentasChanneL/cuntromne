@@ -18,6 +18,7 @@ public class ConfigTab implements TabCompleter {
             result.add("login");
             result.add("t");
             result.add("ct");
+            result.add("endgameentity");
             return result;
         }
         return null;

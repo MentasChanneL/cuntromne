@@ -25,7 +25,8 @@ public class MaterialTags {
             Material.WAXED_EXPOSED_COPPER,
             Material.WAXED_WEATHERED_COPPER,
             Material.QUARTZ_PILLAR,
-            Material.POLISHED_DIORITE
+            Material.POLISHED_DIORITE,
+            Material.POLISHED_BASALT
     ) );
     public static final Set<Material> dirt = new HashSet<>( Arrays.asList(
             Material.DIRT,
@@ -41,6 +42,8 @@ public class MaterialTags {
             Material.CAVE_AIR,
             Material.VOID_AIR,
             Material.IRON_BARS,
-            Material.GRASS
+            Material.GRASS,
+            Material.BARRIER,
+            Material.GRAY_CARPET
     ) );
 }

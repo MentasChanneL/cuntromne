@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.pinusgames.cuntromne.Config;
 import org.pinusgames.cuntromne.Events;
 import org.pinusgames.cuntromne.Round;
+import org.pinusgames.cuntromne.Team;
 
 public class LobbyAction implements Action{
 
@@ -25,7 +26,7 @@ public class LobbyAction implements Action{
         this.player.setGameMode(GameMode.SPECTATOR);
         this.player.setHealth(20);
         this.player.setSaturation(20);
-        Round.lobby.add(this.player);
+        Team.teamList.get("spectator").addMember(this.player);
         cancel(ActionResult.GOOD_END);
     }
 

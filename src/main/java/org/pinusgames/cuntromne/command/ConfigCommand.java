@@ -17,7 +17,7 @@ public class ConfigCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
 
-        if(args.length == 1) {
+        if(args.length > 0) {
             if(!(commandSender instanceof Player)) return false;
             Player player = (Player) commandSender;
             if(args[0].equals("lobby")) {
@@ -50,7 +50,7 @@ public class ConfigCommand implements CommandExecutor {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                player.sendMessage("Login setted: " + player.getLocation());
+                player.sendMessage("T_Spawn setted: " + player.getLocation());
                 return true;
             }
             if(args[0].equals("ct")) {
@@ -61,7 +61,18 @@ public class ConfigCommand implements CommandExecutor {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                player.sendMessage("Login setted: " + player.getLocation());
+                player.sendMessage("CT_Spawn setted: " + player.getLocation());
+                return true;
+            }
+            if(args[0].equals("endgameentity") && args.length > 1) {
+                File configFile = new File(Cuntromne.getInstance().getDataFolder(), "config.yml");
+                Cuntromne.getInstance().getConfig().set("EndGameEntity", args[1]);
+                try {
+                    Cuntromne.getInstance().getConfig().save(configFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                player.sendMessage("EndGameEntity setted: " + args[1]);
                 return true;
             }
         }

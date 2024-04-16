@@ -49,21 +49,23 @@ public class Shop {
 
     public static void addCash(Player player, int count) {
         if(count < 0) {
-            player.sendMessage(Component.text("Вы оштрафованны на " + count)
-                    .append(Component.text("6").font(Key.key("ctum:icons")))
-                    .append(Component.text("(дубовых листьев)!").font(Key.key("minecraft:default")))
-                    .color(TextColor.color(255, 70, 12))
+            player.sendMessage(Component.text("Вы оштрафованны на ").color(TextColor.color(255, 255, 255))
+                    .append(Component.text(count).color(TextColor.color(255, 40, 14)))
+                    .append(Component.text("6").font(Key.key("ctum:icons")).color(TextColor.color(255, 40, 14)))
+                    .append(Component.text("!").font(Key.key("minecraft:default")).color(TextColor.color(255, 255, 255)))
             );
         }else{
-            player.sendMessage(Component.text("Вам зачисленно " + count)
-                    .append(Component.text("6").font(Key.key("ctum:icons")))
-                    .append(Component.text("(дубовых листьев)!").font(Key.key("minecraft:default")))
-                    .color(TextColor.color(100, 255, 0))
+            player.sendMessage(Component.text("Вам зачисленно ").color(TextColor.color(255, 255, 255))
+                    .append(Component.text(count).color(TextColor.color(100, 255, 0)))
+                    .append(Component.text("6").font(Key.key("ctum:icons")).color(TextColor.color(100, 255, 0)))
+                    .append(Component.text("!").font(Key.key("minecraft:default")).color(TextColor.color(255, 255, 255)))
             );
         }
         if(!money.containsKey(player.getUniqueId())) { money.put(player.getUniqueId(), count); return; }
         int balance = money.get( player.getUniqueId() );
         balance = balance + count;
+        if(balance < 0) balance = 0;
+        if(balance > 50) balance = 50;
         money.put(player.getUniqueId(), balance);
     }
 
@@ -154,33 +156,12 @@ public class Shop {
     private static void setMan(Player player) {
         ItemStack armor = player.getInventory().getItem(EquipmentSlot.CHEST);
         ItemMeta meta = armor.getItemMeta();
-        if(Round.teamList.containsKey(player.getUniqueId())) {
-            Team team = Round.teamList.get(player.getUniqueId());
-
-            if(meta != null && meta.hasCustomModelData() && meta.getCustomModelData() == 1) {
-                if(team.id.equals("t")) {
-                    ItemStack result = new ItemStack(Material.SNOWBALL);
-                    ItemMeta resMeta = result.getItemMeta();
-                    resMeta.setCustomModelData(693);
-                    resMeta.displayName(Component.text("репис"));
-                    result.setItemMeta(resMeta);
-                    player.getInventory().setItem(10, result);
-                }
-                if(team.id.equals("ct")) {
-                    ItemStack result = new ItemStack(Material.SNOWBALL);
-                    ItemMeta resMeta = result.getItemMeta();
-                    resMeta.setCustomModelData(691);
-                    resMeta.displayName(Component.text("репис"));
-                    result.setItemMeta(resMeta);
-                    player.getInventory().setItem(10, result);
-                }
-                return;
-            }
-
+        Team team = PlayerData.get(player).team;
+        if(meta != null && meta.hasCustomModelData() && meta.getCustomModelData() == 1) {
             if(team.id.equals("t")) {
                 ItemStack result = new ItemStack(Material.SNOWBALL);
                 ItemMeta resMeta = result.getItemMeta();
-                resMeta.setCustomModelData(692);
+                resMeta.setCustomModelData(693);
                 resMeta.displayName(Component.text("репис"));
                 result.setItemMeta(resMeta);
                 player.getInventory().setItem(10, result);
@@ -188,11 +169,28 @@ public class Shop {
             if(team.id.equals("ct")) {
                 ItemStack result = new ItemStack(Material.SNOWBALL);
                 ItemMeta resMeta = result.getItemMeta();
-                resMeta.setCustomModelData(690);
+                resMeta.setCustomModelData(691);
                 resMeta.displayName(Component.text("репис"));
                 result.setItemMeta(resMeta);
                 player.getInventory().setItem(10, result);
             }
+            return;
+        }
+        if(team.id.equals("t")) {
+            ItemStack result = new ItemStack(Material.SNOWBALL);
+            ItemMeta resMeta = result.getItemMeta();
+            resMeta.setCustomModelData(692);
+            resMeta.displayName(Component.text("репис"));
+            result.setItemMeta(resMeta);
+            player.getInventory().setItem(10, result);
+        }
+        if(team.id.equals("ct")) {
+            ItemStack result = new ItemStack(Material.SNOWBALL);
+            ItemMeta resMeta = result.getItemMeta();
+            resMeta.setCustomModelData(690);
+            resMeta.displayName(Component.text("репис"));
+            result.setItemMeta(resMeta);
+            player.getInventory().setItem(10, result);
         }
     }
 

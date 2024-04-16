@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.pinusgames.cuntromne.Round;
+import org.pinusgames.cuntromne.Team;
 import org.pinusgames.cuntromne.weapon.*;
 
 public class RoundCommand implements CommandExecutor {
@@ -21,6 +22,16 @@ public class RoundCommand implements CommandExecutor {
             if(args[0].equals("stop")) {
                 Round.timeLeft = 1;
                 Round.prepareLeft = 0;
+            }
+            if(args[0].equals("endgameT")) {
+                Round.timeLeft = 1;
+                Round.prepareLeft = 0;
+                Team.teamList.get("t").wins = 16;
+            }
+            if(args[0].equals("endgameCT")) {
+                Round.timeLeft = 1;
+                Round.prepareLeft = 0;
+                Team.teamList.get("ct").wins = 16;
             }
             return true;
         }

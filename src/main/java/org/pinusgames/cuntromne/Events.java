@@ -1,7 +1,9 @@
 package org.pinusgames.cuntromne;
 
+import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -29,6 +31,7 @@ import org.pinusgames.cuntromne.actions.JoinAction;
 import org.pinusgames.cuntromne.actions.LobbyAction;
 import org.pinusgames.cuntromne.utils.NBTEditor;
 import org.pinusgames.cuntromne.smoke.SmokeBlock;
+import org.pinusgames.cuntromne.utils.Timer;
 import org.pinusgames.cuntromne.weapon.Explode;
 import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
@@ -67,14 +70,49 @@ public class Events implements Listener {
     }
 
     @EventHandler
+    public void stopSpectate(PlayerStopSpectatingEntityEvent e) {
+        if(Round.endGameEvent ) {
+            e.setCancelled(true);
+            if(e.getPlayer().getCooldown(Material.STRING) > 0) return;
+            e.getPlayer().setCooldown(Material.STRING, 15);
+
+            if(Round.winTeam.id.equals( PlayerData.get( e.getPlayer() ).team.id )) {
+                e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:taunt", 0.4F, 1);
+                Bukkit.broadcast(Component.text(e.getPlayer().getName()).color(TextColor.color(150, 200, 14))
+                        .append(Component.text(" насмехается над лузерами!").color(TextColor.color(44, 209, 79)))
+                );
+                for(Player player : Round.selectInGame()) {
+                    if(!Round.winTeam.id.equals( PlayerData.get( player ).team.id )) {
+                        player.playSound(player.getLocation(), "ctum:taunt", 1, 1);
+                        player.showTitle( Title.title(
+                                Component.text("4").font(Key.key("ctum:icons"))
+                                        .append( Component.text("   ").font(Key.key("minecraft:default")) ),
+                                Component.text(""),
+                                Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(1))
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
-        Cuntromne.hideNickTeam.addPlayer(e.getPlayer());
+        try {
+            PlayerData.createData(e.getPlayer());
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            e.getPlayer().kick(Component.text("Произошел пранк. Обратитесь к 2м3ы @2m3v в дс"));
+            return;
+        }
+        Team.teamList.get("spectator").addMember( e.getPlayer() );
         Round.actionBars.put(e.getPlayer(), Component.text(""));
         e.getPlayer().setCustomChatCompletions(Arrays.asList("ಧ", "ನ", "బ", "భ"));
         e.getPlayer().teleport( Config.login );
+        e.getPlayer().getInventory().clear();
         Bukkit.getScheduler().runTaskLater(instance, () -> {
             ActionChain.runActionChain(e.getPlayer(), new JoinAction(), new IntroAction(), new LobbyAction());
-        }, 5);
+        }, 20);
 
     }
 
@@ -105,24 +143,6 @@ public class Events implements Listener {
 
     @EventHandler
     public void switchHand(PlayerSwapHandItemsEvent e) {
-        if(Round.endGameEvent) {
-            if(Round.teamList.containsKey( e.getPlayer().getUniqueId() )) return;
-            if(Round.winTeam.id.equals( Round.teamList.get( e.getPlayer().getUniqueId() ).id )) {
-                e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:taunt", 0.4F, 1);
-                for(Player player : Round.selectInGame()) {
-                    if(!Round.winTeam.id.equals( Round.teamList.get( player.getUniqueId() ).id )) {
-                        player.playSound(player.getLocation(), "ctum:taunt", 1, 1);
-                        player.showTitle( Title.title(
-                                Component.text("4").font(Key.key("ctum:icons"))
-                                        .append( Component.text("   ").font(Key.key("minecraft:default")) ),
-                                Component.text(""),
-                                Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(0), Duration.ofSeconds(20))
-                        ));
-                    }
-                }
-            }
-            return;
-        }
         Player p = e.getPlayer();
         if(Round.prepareLeft > 0) {
             e.setCancelled(true);
@@ -290,8 +310,7 @@ public class Events implements Listener {
         if(!(e.getEntity() instanceof Player)) return;
         Player target = (Player) e.getEntity();
         if(target.getGameMode() == GameMode.SPECTATOR) {e.setCancelled(true); return;}
-        if(!Round.teamList.containsKey( target.getUniqueId() )) return;
-        Team team = Round.teamList.get( target.getUniqueId() );
+        Team team = PlayerData.get(target).team;
         if(team.id.equals("t")) {
             Location location = e.getEntity().getLocation();
             if(target.getHealth() - e.getDamage() <= 0) {
@@ -313,37 +332,42 @@ public class Events implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void playerKill(EntityDamageByEntityEvent e) {
+        Bukkit.broadcastMessage(e.getEntity().getType() + " " + e.getDamager().getType());
         if(!(e.getEntity() instanceof Player) || !(e.getDamager() instanceof Player)) return;
         Player victim = (Player) e.getEntity();
         Player damager = (Player) e.getDamager();
-        if(!Round.teamList.containsKey(victim.getUniqueId()) || !Round.teamList.containsKey(damager.getUniqueId())) return;
-        String id1 = Round.teamList.get(victim.getUniqueId()).id;
-        String id2 = Round.teamList.get(damager.getUniqueId()).id;
-        if(id1.equals(id2)) {
-            Shop.addCash(damager, (int)e.getDamage() * 2 * -1);
+        Team id1 = PlayerData.get(victim).team;
+        Team id2 = PlayerData.get(damager).team;
+        if(id1.id.equals( id2.id )) {
+            Shop.addCash(damager, (int)e.getDamage() * -1);
             damager.showTitle(Title.title(
                     Component.text("ТЫ ЧЕ"),
                     Component.text("Зочем ранил союзника?"),
                     Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(0))
             ));
-            if(victim.getHealth() - e.getDamage() <= 0) {
-                Bukkit.broadcast(
-                        damager.displayName()
-                                .append(Component.text(" и "))
-                                .append(victim.displayName())
-                                .append(Component.text(" жёско засосались со слюнями"))
-                );
-            }
+            e.setDamage(e.getDamage() / 2);
+            Timer.runLater(() -> {
+                if (victim.getGameMode() == GameMode.SPECTATOR) {
+                    Bukkit.broadcast(
+                            damager.displayName().color( id2.color )
+                                    .append(Component.text(" и "))
+                                    .append(victim.displayName().color( id1.color ))
+                                    .append(Component.text(" жёско засосались со слюнями").color( TextColor.color(255, 255, 255) ))
+                    );
+                }
+            }, 1);
             return;
         }
-        if(victim.getHealth() - e.getDamage() <= 0) {
-            Shop.addCash(damager, 4);
-            Bukkit.broadcast(
-              damager.displayName()
-                      .append(Component.text(" трахаль "))
-                      .append(victim.displayName())
-            );
-        }
+        Timer.runLater(() -> {
+            if(victim.getGameMode() == GameMode.SPECTATOR) {
+                Shop.addCash(damager, 4);
+                Bukkit.broadcast(
+                        damager.displayName().color( id2.color )
+                                .append(Component.text(" трахаль ").color( TextColor.color(255, 255, 255) ))
+                                .append(victim.displayName().color( id1.color ))
+                );
+            }
+        }, 1);
     }
 
     @EventHandler
@@ -351,7 +375,7 @@ public class Events implements Listener {
         if(!(e.getEntity() instanceof Player)) return;
         Player target = (Player) e.getEntity();
         if(target.getGameMode() == GameMode.SPECTATOR) {e.setCancelled(true); return;}
-        if(!Round.teamList.containsKey( target.getUniqueId() )) return;
+        if(!PlayerData.get(target).team.id.equals("t") && !PlayerData.get(target).team.id.equals("ct")) return;
         e.setCancelled(true);
         target.setGameMode(GameMode.SPECTATOR);
         target.showTitle(Title.title(
@@ -417,10 +441,11 @@ public class Events implements Listener {
 
     @EventHandler
     public void leave(PlayerQuitEvent e) {
-        System.out.println("- " + e.getPlayer().getName());
-        Round.teamList.remove(e.getPlayer().getUniqueId());
-        Round.lobby.remove(e.getPlayer());
-        Round.actionBars.remove(e.getPlayer());
+        try {
+            PlayerData.get(e.getPlayer()).team.removeMember(e.getPlayer());
+        }catch (Exception ignore) {}
+        PlayerData.remove( e.getPlayer() );
+        Round.actionBars.remove( e.getPlayer() );
         Round.endTrigger();
     }
 
