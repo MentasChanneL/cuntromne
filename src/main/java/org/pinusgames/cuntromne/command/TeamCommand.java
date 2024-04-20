@@ -25,11 +25,23 @@ public class TeamCommand implements CommandExecutor {
                 commandSender.sendMessage(Component.text("Команды " + args[1] + " не существует!").color(TextColor.color(255, 0, 0)));
                 return false;
             }
-            Team.teamList.get( args[1] ).addMember( player );
-            commandSender.sendMessage("Игрок " + args[0] + " добавлен в команду " + args[1]);
+            Team team = Team.teamList.get( args[1] );
+            team.addMember( player );
+            commandSender.sendMessage("Игрок " + args[0] + " добавлен в команду " + args[1] + "! Полученный список:");
+            for(Player pl : team.getMembers()) {
+                commandSender.sendMessage(pl.getName());
+            }
             return true;
         }
 
-        return false;
+        for(Team team : Team.teamList.values()) {
+            commandSender.sendMessage(" ");
+            commandSender.sendMessage(team.id + " : ");
+            for(Player pl : team.getMembers()) {
+                commandSender.sendMessage(pl.getName());
+            }
+        }
+
+        return true;
     }
 }

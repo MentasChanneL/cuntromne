@@ -75,6 +75,28 @@ public class ConfigCommand implements CommandExecutor {
                 player.sendMessage("EndGameEntity setted: " + args[1]);
                 return true;
             }
+            if(args[0].equals("plantA")) {
+                File configFile = new File(Cuntromne.getInstance().getDataFolder(), "config.yml");
+                Cuntromne.getInstance().getConfig().set( "PlantA", player.getLocation() );
+                try {
+                    Cuntromne.getInstance().getConfig().save(configFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                player.sendMessage("Plant A setted: " + player.getLocation());
+                return true;
+            }
+            if(args[0].equals("plantB")) {
+                File configFile = new File(Cuntromne.getInstance().getDataFolder(), "config.yml");
+                Cuntromne.getInstance().getConfig().set( "PlantB", player.getLocation() );
+                try {
+                    Cuntromne.getInstance().getConfig().save(configFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                player.sendMessage("Plant B setted: " + player.getLocation());
+                return true;
+            }
         }
 
         return false;

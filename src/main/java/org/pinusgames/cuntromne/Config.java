@@ -13,6 +13,8 @@ public class Config {
     public static Location tspawn = null;
     public static Location ctspawn = null;
     public static UUID endgameentity = null;
+    public static Location plantA = null;
+    public static Location plantB = null;
 
     public Config(Plugin plugin) {
         ConfigurationSection section = plugin.getConfig();
@@ -20,6 +22,8 @@ public class Config {
         login = section.getLocation("Login");
         tspawn = section.getLocation("T_Spawn");
         ctspawn = section.getLocation("CT_Spawn");
+        plantA = section.getLocation("PlantA");
+        plantB = section.getLocation("PlantB");
         try {
             endgameentity = UUID.fromString(section.getString("EndGameEntity"));
         }catch (Exception e) {

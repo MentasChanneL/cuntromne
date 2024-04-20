@@ -14,10 +14,10 @@ public class Team {
 
     public static final HashMap<String, Team> teamList = new HashMap<>();
 
-    public String name = "";
+    public String name;
     public final String id;
     public TextColor color;
-    public Set<Player> members;
+    private Set<UUID> members;
     public int wins;
     public org.bukkit.scoreboard.Team sbTeam;
 
@@ -37,13 +37,13 @@ public class Team {
     }
 
     public void addMember(Player player) {
-        this.members.add(player);
-        if(PlayerData.get(player).team != null) PlayerData.get(player).team.removeMember(player);
+        this.members.add( player.getUniqueId() );
+        if(PlayerData.get( player ).team != null) PlayerData.get(player).team.removeMember(player);
         PlayerData.get(player).team = this;
     }
 
     public void removeMember(Player player) {
-        this.members.remove(player);
+        this.members.remove( player.getUniqueId() );
         PlayerData.get(player).team = null;
     }
 
@@ -56,41 +56,50 @@ public class Team {
     }
 
     public Player getMember(int index) {
-        Player[] list = new Player[members.size()];
+        UUID[] list = new UUID[members.size()];
         int i = 0;
-        for(Player player : members) {
+        for(UUID player : members) {
             list[i] = player;
             i++;
         }
-        return list[index];
+        return Bukkit.getPlayer( list[index] );
     }
 
-    public int getAliveMembersCount() {
-        int count = 0;
-        for(Player player : this.members) {
-            if(player.getGameMode() == GameMode.ADVENTURE) count++;
+    public Set<Player> getMembers() {
+        Set<Player> result = new HashSet<>();
+        Player player;
+        for(UUID uuid : this.members) {
+            player = Bukkit.getPlayer( uuid );
+            if(player == null) continue;
+            result.add(player);
         }
-        return count;
+        return result;
+    }
+
+    public void clearMembers() {
+        members.clear();
     }
 
     public Set<Player> getAliveMembers() {
         Set<Player> result = new HashSet<>();
-        for(Player player : this.members) {
+        Player player;
+        for(UUID uuid : this.members) {
+            player = Bukkit.getPlayer( uuid );
+            if(player == null) continue;
             if(player.getGameMode() == GameMode.ADVENTURE) result.add(player);
         }
         return result;
     }
 
-    public void teamMessage(Component message) {
-        for(Player player : this.members) {
-            player.sendMessage(Component.text("(Командный) ").append(message));
-        }
-    }
-
-    public static void teamMessage(String id, Component message) {
-        Set<Player> listeners = Team.teamList.get(id).members;
-        for(Player player : listeners) {
-            player.sendMessage(Component.text("(Командный) ").append(message));
+    public void teamMessage(Component author, Component message) {
+        Player player;
+        for(UUID uuid : this.members) {
+            player = Bukkit.getPlayer( uuid );
+            if(player == null) continue;
+            player.sendMessage(Component.text("(Командный) ")
+                    .append(author.color( this.color ))
+                    .append(Component.text( " > " ))
+                    .append(message.color( TextColor.color(255, 255, 255) )));
         }
     }
 

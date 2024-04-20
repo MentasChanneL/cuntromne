@@ -25,6 +25,9 @@ public class Givewptab implements TabCompleter {
             result.add("knife");
             result.add("smoke");
             result.add("usp");
+            result.add("c4");
+            result.add("fakec4");
+            result.add("defuse");
             return result;
         }
         return null;

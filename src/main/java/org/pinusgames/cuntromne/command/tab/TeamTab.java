@@ -12,7 +12,8 @@ import java.util.List;
 
 public class TeamTab implements TabCompleter {
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        if(args.length == 1 ) return null;
         return new ArrayList<>(Team.teamList.keySet());
     }
 }

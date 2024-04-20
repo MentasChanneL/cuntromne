@@ -11,6 +11,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.inventory.EquipmentSlot;
@@ -22,6 +23,7 @@ import org.pinusgames.cuntromne.actions.LostAction;
 import org.pinusgames.cuntromne.actions.WinAction;
 import org.pinusgames.cuntromne.donate.Knife;
 import org.pinusgames.cuntromne.weapon.Armor;
+import org.pinusgames.cuntromne.weapon.c4.C4Data;
 
 import java.time.Duration;
 import java.util.*;
@@ -45,6 +47,7 @@ public class Round {
 
     public static void newGame() {
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
+        clearEntities();
         bossbar.setVisible(true);
         timeLeft = 2400;
         prepareLeft = 300;
@@ -59,7 +62,7 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(Player player : Team.teamList.get("ct").members) {
+        for(Player player : Team.teamList.get("ct").getMembers()) {
             player.getInventory().clear();
             player.setItemOnCursor(null);
             Shop.money.put(player.getUniqueId(), 8);
@@ -69,7 +72,7 @@ public class Round {
             player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
             preparePlayer(player);
         }
-        for(Player player : Team.teamList.get("t").members) {
+        for(Player player : Team.teamList.get("t").getMembers()) {
             player.getInventory().clear();
             player.setItemOnCursor(null);
             Shop.money.put(player.getUniqueId(), 8);
@@ -87,9 +90,7 @@ public class Round {
 
     public static void newRound() {
         if(Bukkit.getOnlinePlayers().isEmpty()) return;
-        for(Entity t : Config.ctspawn.getWorld().getEntities()) {
-            if(t instanceof Snowball) t.remove();
-        }
+        clearEntities();
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
         bossbar.setVisible(true);
         timeLeft = 2400;
@@ -103,14 +104,14 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(Player player : Team.teamList.get("ct").members) {
+        for(Player player : Team.teamList.get("ct").getMembers()) {
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
             player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
             preparePlayer(player);
         }
-        for(Player player : Team.teamList.get("t").members) {
+        for(Player player : Team.teamList.get("t").getMembers()) {
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
@@ -136,16 +137,16 @@ public class Round {
     private static void lobbyDist() {
         Team t = Team.teamList.get("t");
         Team ct = Team.teamList.get("ct");
-        for(Player player : Team.teamList.get("spectator").members) {
-            if(ct.getMembersCount() < t.getMembersCount() || ct.getMembersCount() == t.getMembersCount()) {
+
+        for(Player player : Team.teamList.get("spectator").getMembers()) {
+            int ctCount = ct.getMembersCount(); int tCount = t.getMembersCount();
+            if(ctCount <= tCount) {
                 ct.addMember(player);
                 continue;
             }
-            if(ct.getMembersCount() > t.getMembersCount()) {
-                t.addMember(player);
-            }
+            t.addMember(player);
         }
-        Team.teamList.get("spectator").members.clear();
+        Team.teamList.get("spectator").clearMembers();
     }
 
     private static void preparePlayer(Player player) {
@@ -176,6 +177,16 @@ public class Round {
     }
 
     private static void tick() {
+        if(Round.bombTimer > -1) {
+            if(Round.bombTimer == 900) bossbar.setTitle("БОМБАСТЕР");
+            Round.bombTimer--;
+            C4Data.bombPeek();
+            if(Round.bombTimer < 1) {
+                C4Data.explode();
+                Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
+            }
+            return;
+        }
         bossbar();
         if(Round.prepareLeft > 0) {
 
@@ -194,15 +205,15 @@ public class Round {
                     player.sendActionBar(Component.text(""));
                 }
                 Team team = Team.teamList.get("t");
-                if(!team.members.isEmpty()) {
-                    Player random = team.getMember( new Random().nextInt(team.members.size()) );
-                    Team.teamMessage("t", random.displayName().color(TextColor.color(255, 125, 0)).append(Component.text(" : Пошли!" )));
+                if(!team.getMembers().isEmpty()) {
+                    Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+                    team.teamMessage( Component.text( random.getName() ), Component.text("Пошли!" ) );
                     random.getLocation().getWorld().playSound(random.getLocation(), "ctum:player.t.battlecry" + (new Random().nextInt(4) + 1), 1, 1);
                 }
                 team = Team.teamList.get("ct");
-                if(!team.members.isEmpty()) {
-                    Player random = team.getMember( new Random().nextInt(team.members.size()) );
-                    Team.teamMessage("ct", random.displayName().color(TextColor.color(50, 50, 255)).append(Component.text(" : За работу!" )));
+                if(!team.getMembers().isEmpty()) {
+                    Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+                    team.teamMessage( Component.text( random.getName() ), Component.text("За работу!" ) );
                     random.getLocation().getWorld().playSound(random.getLocation(), "ctum:player.ct.battlecry" + (new Random().nextInt(4) + 1), 1, 1);
                 }
             }
@@ -224,7 +235,7 @@ public class Round {
         if(Round.bombTimer == -2) { twin(); return;}
         Set<Player> ctlist = Team.teamList.get("ct").getAliveMembers() ;
         if(Round.bombTimer > -1) {
-            if(!ctlist.isEmpty()) {
+            if(ctlist.isEmpty()) {
                 twin();
                 return;
             }
@@ -252,22 +263,22 @@ public class Round {
             Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
             if(ct.wins > t.wins) {
                 Round.winTeam = ct;
-                for(Player player :  t.members) {
+                for(Player player :  t.getMembers()) {
                     Action action = new LostAction();
                     action.run(player);
                 }
-                for(Player player : ct.members) {
+                for(Player player : ct.getMembers()) {
                     Action action = new WinAction();
                     action.run(player);
                 }
             }
             if(ct.wins < t.wins) {
                 Round.winTeam = t;
-                for(Player player : ct.members) {
+                for(Player player : ct.getMembers()) {
                     Action action = new LostAction();
                     action.run(player);
                 }
-                for(Player player : t.members) {
+                for(Player player : t.getMembers()) {
                     Action action = new WinAction();
                     action.run(player);
                 }
@@ -292,10 +303,10 @@ public class Round {
         Team t = Team.teamList.get("t");
         Round.bombTimer = -3;
         t.wins++;
-        for(Player player : t.members) {
+        for(Player player : t.getMembers()) {
             Shop.addCash(player, 15);
         }
-        for(Player player : ct.members) {
+        for(Player player : ct.getMembers()) {
             Shop.addCash(player, 10);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
@@ -313,10 +324,10 @@ public class Round {
         Team t = Team.teamList.get("t");
         Round.bombTimer = -3;
         ct.wins++;
-        for(Player player : ct.members) {
+        for(Player player : ct.getMembers()) {
             Shop.addCash(player, 15);
         }
-        for(Player player : t.members) {
+        for(Player player : t.getMembers()) {
             Shop.addCash(player, 10);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::endGame, 100);
@@ -335,10 +346,10 @@ public class Round {
         Round.bombTimer = -3;
         ct.wins++;
         t.wins++;
-        for(Player player : ct.members) {
+        for(Player player : ct.getMembers()) {
             Shop.addCash(player, 12);
         }
-        for(Player player : t.members) {
+        for(Player player : t.getMembers()) {
             Shop.addCash(player, 12);
         }
         Bukkit.getScheduler().runTaskLater(Cuntromne.getInstance(), Round::newRound, 100);
@@ -397,6 +408,13 @@ public class Round {
         }
     }
 
+    private static void clearEntities() {
+        for(Entity ent : Config.ctspawn.getWorld().getEntities()) {
+            if(ent instanceof ItemDisplay) ent.remove();
+            if(ent instanceof Snowball) ent.remove();
+        }
+    }
+
     public static void setAB(Player player, Component component) {
         actionBars.put(player, component);
     }
@@ -405,7 +423,7 @@ public class Round {
         List<Player> players = new ArrayList<>();
         for(Team team : Team.teamList.values()) {
             if(team.id.equals("spectator")) continue;
-            players.addAll(team.members);
+            players.addAll(team.getMembers());
         }
         return players;
     }

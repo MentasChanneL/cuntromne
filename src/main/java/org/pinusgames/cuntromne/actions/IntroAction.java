@@ -6,6 +6,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.pinusgames.cuntromne.Cuntromne;
+import org.pinusgames.cuntromne.Team;
 
 import java.time.Duration;
 

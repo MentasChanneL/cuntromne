@@ -1,9 +1,12 @@
 package org.pinusgames.cuntromne;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -77,19 +80,32 @@ public class Events implements Listener {
             e.getPlayer().setCooldown(Material.STRING, 15);
 
             if(Round.winTeam.id.equals( PlayerData.get( e.getPlayer() ).team.id )) {
-                e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:taunt", 0.4F, 1);
+
                 Bukkit.broadcast(Component.text(e.getPlayer().getName()).color(TextColor.color(150, 200, 14))
                         .append(Component.text(" насмехается над лузерами!").color(TextColor.color(44, 209, 79)))
                 );
+                boolean fak = Math.random() < 0.3;
+                if(!fak) { e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:taunt", 0.4F, 1);}
+                else {e.getPlayer().playSound(e.getPlayer().getLocation(), "ctum:boom", 0.5F, 1.25F);}
                 for(Player player : Round.selectInGame()) {
                     if(!Round.winTeam.id.equals( PlayerData.get( player ).team.id )) {
-                        player.playSound(player.getLocation(), "ctum:taunt", 1, 1);
-                        player.showTitle( Title.title(
-                                Component.text("4").font(Key.key("ctum:icons"))
-                                        .append( Component.text("   ").font(Key.key("minecraft:default")) ),
-                                Component.text(""),
-                                Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(1))
-                        ));
+                        if(!fak) {
+                            player.playSound(player.getLocation(), "ctum:taunt", 1, 1);
+                            player.showTitle(Title.title(
+                                    Component.text("4").font(Key.key("ctum:icons"))
+                                            .append(Component.text("   ").font(Key.key("minecraft:default"))),
+                                    Component.text(""),
+                                    Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(1))
+                            ));
+                        }else{
+                            player.playSound(player.getLocation(), "ctum:boom", 1, 1.25F);
+                            player.showTitle(Title.title(
+                                    Component.text("9").font(Key.key("ctum:icons"))
+                                            .append(Component.text("   ").font(Key.key("minecraft:default"))),
+                                    Component.text(""),
+                                    Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(1))
+                            ));
+                        }
                     }
                 }
             }
@@ -98,16 +114,10 @@ public class Events implements Listener {
 
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
-        try {
-            PlayerData.createData(e.getPlayer());
-        }catch (Exception ex) {
-            ex.printStackTrace();
-            e.getPlayer().kick(Component.text("Произошел пранк. Обратитесь к 2м3ы @2m3v в дс"));
-            return;
-        }
-        Team.teamList.get("spectator").addMember( e.getPlayer() );
+        PlayerData.createData(e.getPlayer());
+        e.getPlayer().setGameMode(GameMode.SPECTATOR);
         Round.actionBars.put(e.getPlayer(), Component.text(""));
-        e.getPlayer().setCustomChatCompletions(Arrays.asList("ಧ", "ನ", "బ", "భ"));
+        e.getPlayer().setCustomChatCompletions(Arrays.asList("ಧ", "ನ", "బ", "భ", "!"));
         e.getPlayer().teleport( Config.login );
         e.getPlayer().getInventory().clear();
         Bukkit.getScheduler().runTaskLater(instance, () -> {
@@ -189,7 +199,7 @@ public class Events implements Listener {
                 loc.createExplosion(e.getEntity(), 3);
                 Location expPos = loc.clone();
                 expPos.setYaw(0); expPos.setPitch(0);
-                new Explode(expPos);
+                new Explode(expPos, 4, 1);
                 e.getEntity().remove();
                 return;
             }
@@ -393,14 +403,14 @@ public class Events implements Listener {
         if(event.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
         }
-        if(event.getClickedInventory() == Shop.menu) {
+        if( Shop.isMenu( event.getClickedInventory() ) ) {
             Shop.click(event);
         }
     }
 
     @EventHandler
     public void closeInventory(InventoryCloseEvent event) {
-        if(event.getInventory() == Shop.menu) {
+        if( Shop.isMenu( event.getInventory() ) ) {
             Shop.close(event);
         }
     }
@@ -441,12 +451,26 @@ public class Events implements Listener {
 
     @EventHandler
     public void leave(PlayerQuitEvent e) {
-        try {
-            PlayerData.get(e.getPlayer()).team.removeMember(e.getPlayer());
-        }catch (Exception ignore) {}
+        if(PlayerData.get( e.getPlayer() ) != null && PlayerData.get( e.getPlayer() ).team != null) PlayerData.get( e.getPlayer() ).team.removeMember(e.getPlayer());
         PlayerData.remove( e.getPlayer() );
         Round.actionBars.remove( e.getPlayer() );
         Round.endTrigger();
+    }
+
+    @EventHandler
+    public void message(AsyncChatEvent e) {
+        e.setCancelled(true);
+        PlayerData data = PlayerData.get(e.getPlayer());
+        Team team = data.team;
+        if(team == null) return;
+        String raw = PlainTextComponentSerializer.plainText().serialize( e.message() );
+        if(raw.startsWith("!")) {
+            Bukkit.broadcast(e.getPlayer().displayName()
+                    .color(data.team.color)
+                    .append( Component.text( " > " + raw.substring(1) ).color(TextColor.color(255, 255, 255)) ));
+            return;
+        }
+        data.team.teamMessage(e.getPlayer().displayName(), e.message());
     }
 
 }

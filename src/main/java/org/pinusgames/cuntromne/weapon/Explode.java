@@ -22,16 +22,16 @@ public class Explode {
     public int frame;
     public int task;
 
-    public Explode(Location spawnPos) {
+    public Explode(Location spawnPos, int size, int speed) {
         ItemDisplay id = (ItemDisplay) spawnPos.getWorld().spawnEntity(spawnPos, EntityType.ITEM_DISPLAY);
         ItemStack item = new ItemStack(Material.STICK);
         ItemMeta meta = item.getItemMeta();
         meta.setCustomModelData(700);
         item.setItemMeta(meta);
         id.setTransformation(
-                new Transformation(new Vector3f(0, (float)2.5, 0),
+                new Transformation(new Vector3f(0, (float)((double)size / 2 + 0.5), 0),
                 new AxisAngle4f(0, 0, 0, 0),
-                new Vector3f(4, 4, 4),
+                new Vector3f(size, size, size),
                 new AxisAngle4f(0, 0, 0, 0))
         );
         id.setBillboard(Display.Billboard.VERTICAL);
@@ -52,7 +52,7 @@ public class Explode {
             meta.setCustomModelData(700 + this.frame);
             item.setItemMeta(meta);
             id.setItemStack(item);
-        },1,1).getTaskId();
+        },1,speed).getTaskId();
     }
 
 }

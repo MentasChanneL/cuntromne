@@ -63,7 +63,7 @@ public class ProjectileCreator {
                 loc.createExplosion(target, 3);
                 Location expPos = loc.clone();
                 expPos.setYaw(0); expPos.setPitch(0);
-                new Explode(expPos);
+                new Explode(expPos, 4, 1);
                 target.remove();
             }
         }, 40);

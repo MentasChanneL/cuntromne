@@ -19,6 +19,8 @@ public class ConfigTab implements TabCompleter {
             result.add("t");
             result.add("ct");
             result.add("endgameentity");
+            result.add("plantA");
+            result.add("plantB");
             return result;
         }
         return null;

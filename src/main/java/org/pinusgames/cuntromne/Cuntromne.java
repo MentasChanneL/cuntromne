@@ -28,6 +28,7 @@ public final class Cuntromne extends JavaPlugin {
         this.saveDefaultConfig();
         this.saveResource("knifes.yml", false);
         Animations.initAnimates();
+        Shop.initialize();
         TextFormatter.init();
         new Team("ct", "Контрононисты", TextColor.color(0, 50, 255), ChatColor.BLUE);
         new Team("t", "Экскремисты", TextColor.color(255, 128, 0), ChatColor.GOLD);
