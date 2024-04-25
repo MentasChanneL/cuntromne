@@ -38,6 +38,7 @@ public class Team {
 
     public void addMember(Player player) {
         this.members.add( player.getUniqueId() );
+        this.sbTeam.addPlayer( player );
         if(PlayerData.get( player ).team != null) PlayerData.get(player).team.removeMember(player);
         PlayerData.get(player).team = this;
     }

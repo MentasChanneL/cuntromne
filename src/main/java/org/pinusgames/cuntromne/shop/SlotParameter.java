@@ -39,6 +39,8 @@ public class SlotParameter {
         if(this.item.equals("flash")) give = GrenadeFlash.give(player);
         if(this.item.equals("smoke")) give = GrenadeSmoke.give(player);
         if(this.item.equals("usp")) give = USP.give(player);
+        if(this.item.equals("defuse")) give = Defuse.give(player);
+        if(this.item.equals("fakec4")) give = FakeC4.give(player);
         if(this.item.equals("armor")) {
             give = Armor.give(player);
             player.getWorld().playSound(player.getLocation(), "ctum:armor", 1, 1);

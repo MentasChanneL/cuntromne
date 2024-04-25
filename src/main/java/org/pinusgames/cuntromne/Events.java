@@ -1,10 +1,13 @@
 package org.pinusgames.cuntromne;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
@@ -53,10 +56,12 @@ public class Events implements Listener {
     public Events(Cuntromne plugin) {
         this.instance = plugin;
     }
+    public static boolean tabChecker = false;
 
     @EventHandler
     public void playerMove(PlayerMoveEvent e) {
         if(blockMove.contains(e.getPlayer().getUniqueId())) {
+            if(!e.hasExplicitlyChangedPosition()) return;
             e.setCancelled(true);
             return;
         }
@@ -123,6 +128,25 @@ public class Events implements Listener {
         Bukkit.getScheduler().runTaskLater(instance, () -> {
             ActionChain.runActionChain(e.getPlayer(), new JoinAction(), new IntroAction(), new LobbyAction());
         }, 20);
+
+        new Timer(10, e.getPlayer().getUniqueId(), () -> {
+            PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_LIST_HEADER_FOOTER);
+
+            packet.getChatComponents().write(0, WrappedChatComponent.fromText( Config.tabTop ));
+            int p = e.getPlayer().getPing();
+            int green = 255; if(p > 100) green = 255 - p + 50;
+            String color = String.format("#%02X%02X%02X", 255, green, 0);
+
+            String bottom = Config.tabBottom.replaceAll("_ping_", p + "");
+            bottom = bottom.replaceAll("_pingColor_", color);
+            if(Events.tabChecker) { bottom = bottom.replaceAll("_checker_", "⁎"); }
+            else { bottom = bottom.replaceAll("_checker_", "◦"); }
+            Events.tabChecker = !Events.tabChecker;
+            packet.getChatComponents().write(1, WrappedChatComponent.fromJson( bottom ));
+
+            try { ProtocolLibrary.getProtocolManager().sendServerPacket(e.getPlayer(), packet); }
+            catch (Exception ex) { ex.printStackTrace(); }
+        });
 
     }
 
@@ -194,7 +218,7 @@ public class Events implements Listener {
         if(data.type == ProjectileType.GRENADE_HE) {
             data.data++;
             Location loc = e.getEntity().getLocation();
-            if(System.currentTimeMillis() - data.spawnTime > 2000 || data.data > 3) {
+            if(System.currentTimeMillis() - data.spawnTime > 2000) {
                 loc.getWorld().playSound(loc, "ctum:explode" + (new Random().nextInt(3) + 1), 4, 1);
                 loc.createExplosion(e.getEntity(), 3);
                 Location expPos = loc.clone();
@@ -251,7 +275,7 @@ public class Events implements Listener {
                 ItemMeta meta = visual.getItemMeta();
                 meta.setCustomModelData(606);
                 visual.setItemMeta(meta);
-                SmokeBlock.createSmoke(126, loc, visual);
+                SmokeBlock.createSmoke(190, loc, visual);
                 loc.getWorld().playSound(loc, "ctum:weapon.smoke", 1, 1);
                 e.getEntity().remove();
                 return;
@@ -348,7 +372,7 @@ public class Events implements Listener {
         Player damager = (Player) e.getDamager();
         Team id1 = PlayerData.get(victim).team;
         Team id2 = PlayerData.get(damager).team;
-        if(id1.id.equals( id2.id )) {
+        if(id1.id.equals( id2.id ) && !(damager.getUniqueId().equals( victim.getUniqueId() ))) {
             Shop.addCash(damager, (int)e.getDamage() * -1);
             damager.showTitle(Title.title(
                     Component.text("ТЫ ЧЕ"),
@@ -386,6 +410,7 @@ public class Events implements Listener {
         Player target = (Player) e.getEntity();
         if(target.getGameMode() == GameMode.SPECTATOR) {e.setCancelled(true); return;}
         if(!PlayerData.get(target).team.id.equals("t") && !PlayerData.get(target).team.id.equals("ct")) return;
+        target.closeInventory();
         e.setCancelled(true);
         target.setGameMode(GameMode.SPECTATOR);
         target.showTitle(Title.title(

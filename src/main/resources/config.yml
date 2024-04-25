@@ -2,3 +2,9 @@ Lobby: 0
 Login: 0
 CT_Spawn: 0
 T_Spawn: 0
+PlantA: 0
+PlantB: 0
+EndGameEntity: 0
+
+TablistHead: "ւ      \n\n\n\n\n"
+TablistFoot: '[{"text":"ߤ\n"}, {"text":"_checker_        ", "color":"gold"}, {"text": "_ping_ ms", "color": "_pingColor_"}, {"text":"        _checker_\n", "color":"gold"}]'

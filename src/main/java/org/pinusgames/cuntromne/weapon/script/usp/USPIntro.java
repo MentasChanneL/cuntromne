@@ -25,7 +25,7 @@ public class USPIntro extends Script {
             return false;
         }
 
-        if(this.frame == 10 && this.next) {
+        if(this.frame == 12 && this.next) {
             this.data.player.getWorld().playSound(this.data.player.getLocation(), "ctum:weapon.glock.intro", 1, 1);
         }
 

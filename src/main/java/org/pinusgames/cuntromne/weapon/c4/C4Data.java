@@ -16,6 +16,7 @@ import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.Explode;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public abstract class C4Data {
@@ -81,6 +82,7 @@ public abstract class C4Data {
 
         Location loc = C4Data.entity.getLocation();
         loc.getWorld().playSound(loc, "ctum:c4.explode", 100, 1);
+        loc.getWorld().playSound(loc, "ctum:c4.taunt" + (new Random().nextInt(3) + 1), 100, (float)(1 + Math.random() * 0.2));
         Location spawnPos = loc.clone();
         spawnPos.add(0, 4, 0);
         new Explode(spawnPos, 24, 2);

@@ -384,15 +384,24 @@ public class Round {
     private static void bossbarTxtCreator() {
         Team ct = Team.teamList.get("ct");
         Team t = Team.teamList.get("t");
+
+        int alive = ct.getAliveMembers().size();
+        int dead = ct.getMembersCount() - alive;
+        int i = 0;
         StringBuilder c = new StringBuilder();
-        for(int i = 0; i < ct.getMembersCount(); i++) {
-            c.append("1");
-        }
-        Component title = Component.text(c.toString()).font(Key.key("ctum:icons"));
+        while(i < alive) { c.append("1"); i++; }
+        i = 0;
+        while(i < dead) { c.append(":"); i++; }
+        Component title = Component.text( c.toString() ).font( Key.key("ctum:icons") );
+
         c = new StringBuilder();
-        for(int i = 0; i < t.getMembersCount(); i++) {
-            c.append("2");
-        }
+        alive = t.getAliveMembers().size();
+        dead = t.getMembersCount() - alive;
+        i = 0;
+        while(i < alive) { c.append("2"); i++; }
+        i = 0;
+        while(i < dead) { c.append(";"); i++; }
+
         title = title.append(Component.text("                       ").font(Key.key("minecraft:default"))).append(Component.text(c.toString()).font(Key.key("ctum:icons")));
         mansBossbar.name(title);
     }

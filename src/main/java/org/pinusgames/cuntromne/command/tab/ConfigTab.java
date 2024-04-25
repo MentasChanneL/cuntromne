@@ -14,6 +14,7 @@ public class ConfigTab implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         List<String> result = new ArrayList<>();
         if(args.length == 1) {
+            result.add("!reload");
             result.add("lobby");
             result.add("login");
             result.add("t");

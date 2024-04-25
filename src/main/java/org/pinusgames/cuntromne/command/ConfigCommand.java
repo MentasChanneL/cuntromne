@@ -1,14 +1,13 @@
 package org.pinusgames.cuntromne.command;
 
-import org.bukkit.Bukkit;
+import org.bukkit.block.BrewingStand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.pinusgames.cuntromne.Config;
 import org.pinusgames.cuntromne.Cuntromne;
-import org.pinusgames.cuntromne.actions.Action;
-import org.pinusgames.cuntromne.actions.IntroAction;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,6 +94,11 @@ public class ConfigCommand implements CommandExecutor {
                     throw new RuntimeException(e);
                 }
                 player.sendMessage("Plant B setted: " + player.getLocation());
+                return true;
+            }
+            if(args[0].equals("!reload") || args[0].equals("reload")) {
+                Config.instance( Cuntromne.getInstance() );
+                commandSender.sendMessage("[o]");
                 return true;
             }
         }

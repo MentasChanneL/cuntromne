@@ -92,13 +92,13 @@ public class ProjectileCreator {
             if(target == null) return;
 
             if(target.isValid()) {
+                Component texture = Component.text(new Random().nextInt(9)).font(Key.key("ctum:flash"));
                 for(Player player : Bukkit.getOnlinePlayers()) {
-
                     if(!Look.isPlayerLookingAtLocation(player, target.getLocation(), 0.5)) continue;
                     if(!Look.wayIsClear(player.getEyeLocation(), target.getLocation())) continue;
                     player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, false, false));
                     player.showTitle(Title.title(
-                            Component.text(new Random().nextInt(8)).font(Key.key("ctum:flash")),
+                            texture,
                             Component.text(")").font(Key.key("ctum:intro")),
                             Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(2), Duration.ofSeconds(1))
                     ));

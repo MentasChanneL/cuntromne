@@ -19,12 +19,11 @@ public final class Cuntromne extends JavaPlugin {
     public HashMap<UUID, Projectile> projectiles = new HashMap<>();
     private static Cuntromne instance;
     private int WeaponID = 0;
-    public Config config;
 
     @Override
     public void onEnable() {
         instance = this;
-        this.config = new Config(this);
+        Config.instance( Cuntromne.getInstance() );
         this.saveDefaultConfig();
         this.saveResource("knifes.yml", false);
         Animations.initAnimates();
@@ -34,6 +33,7 @@ public final class Cuntromne extends JavaPlugin {
         new Team("t", "Экскремисты", TextColor.color(255, 128, 0), ChatColor.GOLD);
         new Team("spectator", "Привидения с мотором", TextColor.color(255, 255, 255), ChatColor.WHITE);
         Bukkit.getPluginManager().registerEvents(new Events(this), this);
+        Bukkit.getServer().resetRecipes();
 
         this.getCommand("giveweapon").setExecutor(new Giveweapon());
         this.getCommand("ctumteam").setExecutor(new TeamCommand());

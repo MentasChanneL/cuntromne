@@ -48,7 +48,7 @@ public class FakeC4 implements WeaponActions{
     public static ItemStack give(Player player) {
         ItemStack result = new ItemStack(Material.STICK);
         ItemMeta meta = result.getItemMeta();
-        meta.setCustomModelData(851);
+        meta.setCustomModelData(850);
         meta.displayName(Component.text("ФЕИК").decoration(TextDecoration.ITALIC, false));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         result.setItemMeta(meta);
