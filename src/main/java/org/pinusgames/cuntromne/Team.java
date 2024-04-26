@@ -31,7 +31,7 @@ public class Team {
         if (this.sbTeam == null) {
             this.sbTeam = scoreboard.registerNewTeam(id);
         }
-        this.sbTeam.setOption(org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY, org.bukkit.scoreboard.Team.OptionStatus.FOR_OWN_TEAM);
+        this.sbTeam.setOption(org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY, org.bukkit.scoreboard.Team.OptionStatus.FOR_OTHER_TEAMS);
         this.sbTeam.setColor(teamColor);
         Team.teamList.put(id, this);
     }

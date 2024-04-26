@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.UUID;
 
 public class ProjectileCreator {
-    public static void createBullet(Location location, UUID owner, int damage) {
+    public static Snowball createBullet(Location location, UUID owner, int damage) {
         Snowball bullet = (Snowball) location.getWorld().spawnEntity(location, EntityType.SNOWBALL);
         bullet.setVelocity(location.getDirection().multiply(4));
         ItemStack item = new ItemStack(Material.SNOWBALL);
@@ -34,6 +34,7 @@ public class ProjectileCreator {
         item.setItemMeta(meta);
         Cuntromne.getInstance().projectiles.put(bullet.getUniqueId(), new Projectile(System.currentTimeMillis(), owner, damage, bullet.getUniqueId(), ProjectileType.BULLET, 0));
         bullet.setItem(item);
+        return bullet;
     }
 
     public static Snowball createHE(Location location, UUID owner, int damage) {

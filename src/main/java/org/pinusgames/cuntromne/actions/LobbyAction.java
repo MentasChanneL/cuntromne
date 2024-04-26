@@ -26,7 +26,11 @@ public class LobbyAction implements Action{
         this.player.setGameMode(GameMode.SPECTATOR);
         this.player.setHealth(20);
         this.player.setSaturation(20);
-        Team.teamList.get("spectator").addMember(this.player);
+        Team s = Team.teamList.get("spectator");
+        s.addMember(this.player);
+        if(Round.roundID == -1 && s.getMembers().size() > 1) {
+            Round.newGame();
+        }
         cancel(ActionResult.GOOD_END);
     }
 

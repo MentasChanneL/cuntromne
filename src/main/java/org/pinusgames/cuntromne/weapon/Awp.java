@@ -91,7 +91,7 @@ public class Awp implements WeaponActions{
         meta.displayName(Component.text("СЛОНОЁБ").decoration(TextDecoration.ITALIC, false));
         result.setItemMeta(meta);
         int id = Cuntromne.getInstance().getWeaponID();
-        WeaponData data = new WeaponData(new Awp(), result, 5, 25, id);
+        WeaponData data = new WeaponData(new Awp(), result, 5, 40, id);
         data.player = player;
         Cuntromne.getInstance().weapons.put(id, data);
         result = NBTEditor.setItemTag(result, id, "cunt-weaponid");

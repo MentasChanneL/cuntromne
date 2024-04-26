@@ -30,7 +30,7 @@ import java.util.*;
 
 public class Round {
 
-    public static int roundID = 0;
+    public static int roundID = -1;
     public static BossBar bossbar = Bukkit.createBossBar("00:00", BarColor.WHITE, BarStyle.SOLID);
 
     public static int timeLeft;
@@ -62,26 +62,20 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(Player player : Team.teamList.get("ct").getMembers()) {
+
+        Set<Player> players = Team.teamList.get("ct").getMembers();
+        players.addAll( Team.teamList.get("t").getMembers() );
+
+        for(Player player : players) {
             player.getInventory().clear();
             player.setItemOnCursor(null);
-            Shop.money.put(player.getUniqueId(), 8);
+            Shop.money.put(player.getUniqueId(), 9);
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
-            player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
             preparePlayer(player);
         }
-        for(Player player : Team.teamList.get("t").getMembers()) {
-            player.getInventory().clear();
-            player.setItemOnCursor(null);
-            Shop.money.put(player.getUniqueId(), 8);
-            mansBossbar.addViewer(player);
-            bossbar.addPlayer(player);
-            scoreBossbar.addViewer(player);
-            player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-            preparePlayer(player);
-        }
+
         bossbarTxtCreator();
         actionBarReset();
         schedulerActionbar = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::actionBarTick, 1, 1 ).getTaskId();
@@ -104,20 +98,16 @@ public class Round {
             mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
             bossbar.removePlayer( bossbar.getPlayers().get(i) );
         }
-        for(Player player : Team.teamList.get("ct").getMembers()) {
+        Set<Player> players = Team.teamList.get("ct").getMembers();
+        players.addAll( Team.teamList.get("t").getMembers() );
+
+        for(Player player : players) {
             mansBossbar.addViewer(player);
             bossbar.addPlayer(player);
             scoreBossbar.addViewer(player);
-            player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
             preparePlayer(player);
         }
-        for(Player player : Team.teamList.get("t").getMembers()) {
-            mansBossbar.addViewer(player);
-            bossbar.addPlayer(player);
-            scoreBossbar.addViewer(player);
-            player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-            preparePlayer(player);
-        }
+
         actionBarReset();
         bossbarTxtCreator();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
@@ -152,6 +142,8 @@ public class Round {
     private static void preparePlayer(Player player) {
         Events.blockMove.add(player.getUniqueId());
         Team team = PlayerData.get(player).team;
+        if( team.id.equals("ct") ) player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+        if( team.id.equals("t") ) player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
         ItemStack chest = player.getInventory().getItem(EquipmentSlot.CHEST);
         ItemStack knife = Knife.getKnife(player.getUniqueId());
         if(!chest.hasItemMeta() || !chest.getItemMeta().hasCustomModelData() ) {
@@ -435,6 +427,36 @@ public class Round {
             players.addAll(team.getMembers());
         }
         return players;
+    }
+
+    public static void closeGame() {
+        Round.timeLeft = 0;
+        Round.prepareLeft = 0;
+        Round.bombTimer = -3;
+        Bukkit.getScheduler().cancelTask(Round.schedulerTimer);
+        Round.schedulerTimer = -1;
+        Bukkit.getScheduler().cancelTask(Round.schedulerActionbar);
+        Round.schedulerActionbar = -1;
+        Round.endGameEvent = false;
+        Round.winTeam = null;
+        Round.roundID = -1;
+        for(int i = 0; i < bossbar.getPlayers().size(); i++) {
+            scoreBossbar.removeViewer( bossbar.getPlayers().get(i) );
+            mansBossbar.removeViewer( bossbar.getPlayers().get(i) );
+            bossbar.removePlayer( bossbar.getPlayers().get(i) );
+        }
+        clearEntities();
+        Team t = Team.teamList.get("t");
+        Team ct = Team.teamList.get("ct");
+        Team s = Team.teamList.get("spectator");
+        Set<Player> players = t.getMembers();
+        players.addAll( ct.getMembers() );
+        for(Player player : players) {
+            s.addMember(player);
+            player.setGameMode( GameMode.SPECTATOR );
+            player.getInventory().clear();
+        }
+        Bukkit.broadcast(Component.text("Игра остановлена..."));
     }
 
 }

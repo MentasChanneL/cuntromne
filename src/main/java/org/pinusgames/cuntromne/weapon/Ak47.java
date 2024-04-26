@@ -74,7 +74,7 @@ public class Ak47 implements WeaponActions{
         meta.displayName(Component.text("КАЛШАШ-48").decoration(TextDecoration.ITALIC, false));
         result.setItemMeta(meta);
         int id = Cuntromne.getInstance().getWeaponID();
-        WeaponData data = new WeaponData(new Ak47(), result, 30, 90, id);
+        WeaponData data = new WeaponData(new Ak47(), result, 30, 100, id);
         data.player = player;
         Cuntromne.getInstance().weapons.put(id, data);
         result = NBTEditor.setItemTag(result, id, "cunt-weaponid");

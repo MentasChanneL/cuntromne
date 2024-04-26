@@ -1,6 +1,7 @@
 package org.pinusgames.cuntromne.weapon.script.awp;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.entity.Snowball;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 import org.pinusgames.cuntromne.Round;
@@ -23,7 +24,8 @@ public class AwpFire extends Script {
             Vector vector = this.data.player.getEyeLocation().getDirection();
             this.data.player.setVelocity( this.data.player.getVelocity().add( vector.multiply(-1) ) );
             this.data.player.setCooldown(this.data.item.getType(), 35);
-            ProjectileCreator.createBullet(this.data.player.getEyeLocation(), this.data.player.getUniqueId(), 30);
+            Snowball bullet = ProjectileCreator.createBullet(this.data.player.getEyeLocation(), this.data.player.getUniqueId(), 30);
+            bullet.setGravity(false);
             this.animation = Animations.animations.get("awp.fire");
             this.data.player.getWorld().playSound(this.data.player.getLocation(), "ctum:weapon.awp.fire", 4, 1);
             this.frame = 0;

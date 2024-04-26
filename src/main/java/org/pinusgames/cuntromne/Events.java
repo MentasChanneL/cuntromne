@@ -366,10 +366,17 @@ public class Events implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void playerKill(EntityDamageByEntityEvent e) {
-        Bukkit.broadcastMessage(e.getEntity().getType() + " " + e.getDamager().getType());
-        if(!(e.getEntity() instanceof Player) || !(e.getDamager() instanceof Player)) return;
+        Player damager;
+        if(e.getDamager() instanceof Snowball) {
+            Snowball b = (Snowball) e.getDamager();
+            if(b.getShooter() != null) damager = (Player) b.getShooter();
+            else damager = null;
+        }else{
+            damager = (Player) e.getDamager();
+        }
+        if(damager == null) return;
+        if(!(e.getEntity() instanceof Player)) return;
         Player victim = (Player) e.getEntity();
-        Player damager = (Player) e.getDamager();
         Team id1 = PlayerData.get(victim).team;
         Team id2 = PlayerData.get(damager).team;
         if(id1.id.equals( id2.id ) && !(damager.getUniqueId().equals( victim.getUniqueId() ))) {
@@ -395,6 +402,15 @@ public class Events implements Listener {
         Timer.runLater(() -> {
             if(victim.getGameMode() == GameMode.SPECTATOR) {
                 Shop.addCash(damager, 4);
+                if(victim.getUniqueId().equals( damager.getUniqueId() )) {
+                    Bukkit.broadcast(
+                            damager.displayName().color( id2.color )
+                                    .append(Component.text(" трахаль ").color( TextColor.color(255, 255, 255) ))
+                                    .append(victim.displayName().color( id1.color ))
+                                    .append(Component.text(" (как это возможно?)").color(TextColor.color(255, 255, 255)))
+                    );
+                    return;
+                }
                 Bukkit.broadcast(
                         damager.displayName().color( id2.color )
                                 .append(Component.text(" трахаль ").color( TextColor.color(255, 255, 255) ))
@@ -479,6 +495,10 @@ public class Events implements Listener {
         if(PlayerData.get( e.getPlayer() ) != null && PlayerData.get( e.getPlayer() ).team != null) PlayerData.get( e.getPlayer() ).team.removeMember(e.getPlayer());
         PlayerData.remove( e.getPlayer() );
         Round.actionBars.remove( e.getPlayer() );
+        if(Bukkit.getOnlinePlayers().size() <= 2 && Round.roundID > -1) {
+            Round.closeGame();
+            return;
+        }
         Round.endTrigger();
     }
 

@@ -22,7 +22,7 @@ public class exCommand implements CommandExecutor {
         }
         StringBuilder builder = new StringBuilder();
         for(String arg : args) {
-            builder.append(arg);
+            builder.append(arg).append(" ");
         }
         Bukkit.broadcast(Component.text(player.getName()).color(TextColor.color( 255, 0, 200 ))
                 .append( Component.text(" хочет СЭКСА с ").color(TextColor.color(255, 0, 120)))

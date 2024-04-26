@@ -72,7 +72,7 @@ public class M4A1 implements WeaponActions{
         meta.displayName(Component.text("M4ASS").decoration(TextDecoration.ITALIC, false));
         result.setItemMeta(meta);
         int id = Cuntromne.getInstance().getWeaponID();
-        WeaponData data = new WeaponData(new M4A1(), result, 25, 90, id);
+        WeaponData data = new WeaponData(new M4A1(), result, 25, 100, id);
         data.player = player;
         Cuntromne.getInstance().weapons.put(id, data);
         result = NBTEditor.setItemTag(result, id, "cunt-weaponid");
