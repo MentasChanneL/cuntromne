@@ -38,12 +38,14 @@ import org.pinusgames.cuntromne.actions.LobbyAction;
 import org.pinusgames.cuntromne.utils.NBTEditor;
 import org.pinusgames.cuntromne.smoke.SmokeBlock;
 import org.pinusgames.cuntromne.utils.Timer;
+import org.pinusgames.cuntromne.weapon.C4;
+import org.pinusgames.cuntromne.weapon.Defuse;
 import org.pinusgames.cuntromne.weapon.Explode;
+import org.pinusgames.cuntromne.weapon.c4.C4Data;
 import org.pinusgames.cuntromne.weapon.projectile.Projectile;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileCreator;
 import org.pinusgames.cuntromne.weapon.projectile.ProjectileType;
 
-import java.awt.*;
 import java.time.Duration;
 import java.util.*;
 import java.util.List;
@@ -434,8 +436,14 @@ public class Events implements Listener {
                 Component.text("вы умер :("),
                 Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))
         ));
+        if(target.getInventory().getItem(6) != null && PlayerData.get(target).team.id.equals("ct")) {
+            C4Data.dropDefuse(target.getEyeLocation());
+        }
         target.getInventory().clear();
         target.setItemOnCursor(null);
+        if(C4Data.C4Handler != null && C4Data.C4Handler.equals(target.getUniqueId())) {
+            C4Data.dropC4(target.getEyeLocation());
+        }
         Round.endTrigger();
     }
 
@@ -492,7 +500,13 @@ public class Events implements Listener {
 
     @EventHandler
     public void leave(PlayerQuitEvent e) {
+        if(C4Data.C4Handler != null && C4Data.C4Handler.equals(e.getPlayer().getUniqueId())) {
+            C4Data.dropC4(e.getPlayer().getEyeLocation());
+        }
         if(PlayerData.get( e.getPlayer() ) != null && PlayerData.get( e.getPlayer() ).team != null) PlayerData.get( e.getPlayer() ).team.removeMember(e.getPlayer());
+        if(e.getPlayer().getInventory().getItem(6) != null && PlayerData.get(e.getPlayer()).team.id.equals("ct")) {
+            C4Data.dropDefuse(e.getPlayer().getEyeLocation());
+        }
         PlayerData.remove( e.getPlayer() );
         Round.actionBars.remove( e.getPlayer() );
         if(Bukkit.getOnlinePlayers().size() <= 2 && Round.roundID > -1) {
@@ -516,6 +530,29 @@ public class Events implements Listener {
             return;
         }
         data.team.teamMessage(e.getPlayer().displayName(), e.message());
+    }
+
+    @EventHandler
+    public void pickupItem(PlayerAttemptPickupItemEvent e) {
+        if(C4Data.C4Handler != null && C4Data.C4Handler.equals( e.getItem().getUniqueId() )) {
+            e.setCancelled(true);
+            Player player = e.getPlayer();
+            Team team = PlayerData.get( player ).team;
+            if(team == null || !(team.id.equals("t"))) return;
+            e.getItem().remove();
+            if(!player.isSneaking()) player.getWorld().playSound( e.getPlayer().getLocation(), "ctum:round", 1F, 1F );
+            player.getInventory().setItem(8, C4.give( player ));
+            C4Data.C4Handler = player.getUniqueId();
+        }
+        if(C4Data.defuses.contains( e.getItem().getUniqueId() )) {
+            e.setCancelled(true);
+            Player player = e.getPlayer();
+            Team team = PlayerData.get( player ).team;
+            if(team == null || !(team.id.equals("ct")) || player.getInventory().getItem(6) != null) return;
+            e.getItem().remove();
+            if(!player.isSneaking()) player.getWorld().playSound( e.getPlayer().getLocation(), "ctum:round", 1F, 1F );
+            player.getInventory().setItem(6, Defuse.give( player ));
+        }
     }
 
 }

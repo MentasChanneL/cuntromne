@@ -10,10 +10,7 @@ import org.bukkit.GameMode;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -23,6 +20,9 @@ import org.pinusgames.cuntromne.actions.LostAction;
 import org.pinusgames.cuntromne.actions.WinAction;
 import org.pinusgames.cuntromne.donate.Knife;
 import org.pinusgames.cuntromne.weapon.Armor;
+import org.pinusgames.cuntromne.weapon.C4;
+import org.pinusgames.cuntromne.weapon.Defuse;
+import org.pinusgames.cuntromne.weapon.WeaponData;
 import org.pinusgames.cuntromne.weapon.c4.C4Data;
 
 import java.time.Duration;
@@ -55,6 +55,7 @@ public class Round {
         Team.teamList.get("ct").wins = 0;
         Team.teamList.get("t").wins = 0;
         roundID = 0;
+        Cuntromne.getInstance().resetWeaponID();
         lobbyDist();
         setScoreBossbar();
         for(int i = 0; i < bossbar.getPlayers().size(); i++) {
@@ -78,6 +79,21 @@ public class Round {
 
         bossbarTxtCreator();
         actionBarReset();
+
+        Team team = Team.teamList.get("t");
+        if(!team.getMembers().isEmpty()) {
+            Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+            random.getInventory().setItem(8, C4.give(random));
+            team.teamMessage(Component.text( random.getName() ), Component.text("У меня БОМБАСТЕР!" ));
+            C4Data.C4Handler = random.getUniqueId();
+        }
+
+        team = Team.teamList.get("ct");
+        if(!team.getMembers().isEmpty()) {
+            Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+            random.getInventory().setItem(6, Defuse.give(random));
+        }
+
         schedulerActionbar = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::actionBarTick, 1, 1 ).getTaskId();
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
     }
@@ -87,6 +103,7 @@ public class Round {
         clearEntities();
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
         bossbar.setVisible(true);
+        C4Data.defuses.clear();
         timeLeft = 2400;
         prepareLeft = 300;
         bombTimer = -1;
@@ -110,6 +127,21 @@ public class Round {
 
         actionBarReset();
         bossbarTxtCreator();
+
+        Team team = Team.teamList.get("t");
+        if(!team.getMembers().isEmpty()) {
+            Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+            random.getInventory().setItem(8, C4.give(random));
+            team.teamMessage(Component.text( random.getName() ), Component.text("У меня БОМБАСТЕР!" ));
+            C4Data.C4Handler = random.getUniqueId();
+        }
+
+        team = Team.teamList.get("ct");
+        if(!team.getMembers().isEmpty()) {
+            Player random = team.getMember( new Random().nextInt( team.getMembers().size()) );
+            random.getInventory().setItem(6, Defuse.give(random));
+        }
+
         schedulerTimer = Bukkit.getScheduler().runTaskTimer( Cuntromne.getInstance(), Round::tick, 1, 1 ).getTaskId();
     }
 
@@ -143,7 +175,10 @@ public class Round {
         Events.blockMove.add(player.getUniqueId());
         Team team = PlayerData.get(player).team;
         if( team.id.equals("ct") ) player.teleport( Config.ctspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
-        if( team.id.equals("t") ) player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+        if( team.id.equals("t") ) {
+            player.getInventory().setItem(8, null);
+            player.teleport( Config.tspawn.clone().add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3) );
+        }
         ItemStack chest = player.getInventory().getItem(EquipmentSlot.CHEST);
         ItemStack knife = Knife.getKnife(player.getUniqueId());
         if(!chest.hasItemMeta() || !chest.getItemMeta().hasCustomModelData() ) {
@@ -287,7 +322,7 @@ public class Round {
             }, 200);
             return;
         }
-        newRound();
+        if(Round.roundID > -1) newRound();
     }
 
     private static void twin() {
@@ -381,9 +416,9 @@ public class Round {
         int dead = ct.getMembersCount() - alive;
         int i = 0;
         StringBuilder c = new StringBuilder();
-        while(i < alive) { c.append("1"); i++; }
-        i = 0;
         while(i < dead) { c.append(":"); i++; }
+        i = 0;
+        while(i < alive) { c.append("1"); i++; }
         Component title = Component.text( c.toString() ).font( Key.key("ctum:icons") );
 
         c = new StringBuilder();
@@ -413,6 +448,7 @@ public class Round {
         for(Entity ent : Config.ctspawn.getWorld().getEntities()) {
             if(ent instanceof ItemDisplay) ent.remove();
             if(ent instanceof Snowball) ent.remove();
+            if(ent instanceof Item) ent.remove();
         }
     }
 

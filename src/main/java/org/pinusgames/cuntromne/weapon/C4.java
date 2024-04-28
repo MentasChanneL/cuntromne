@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +43,13 @@ public class C4 implements WeaponActions{
     }
 
     @Override
-    public void review(WeaponData data) {}
+    public void review(WeaponData data) {
+        data.player.getInventory().setItemInMainHand(null);
+        Item c4 = C4Data.dropC4(data.player.getEyeLocation());
+        c4.setVelocity( data.player.getEyeLocation().getDirection().multiply(0.5) );
+        if(!data.player.isSneaking()) data.player.getWorld().playSound(data.player.getLocation(), "ctum:weapon.deagle.out2", 1 ,2);
+        data.player.swingMainHand();
+    }
 
     @Override
     public void shift(WeaponData data) {

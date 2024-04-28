@@ -62,6 +62,10 @@ public final class Cuntromne extends JavaPlugin {
         return this.WeaponID;
     }
 
+    public void resetWeaponID() {
+        this.WeaponID = 0;
+    }
+
     public static Cuntromne getInstance() { return instance; }
 
 }

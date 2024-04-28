@@ -28,6 +28,8 @@ public class Givewptab implements TabCompleter {
             result.add("c4");
             result.add("fakec4");
             result.add("defuse");
+            result.add("p250");
+            result.add("tec9");
             return result;
         }
         return null;

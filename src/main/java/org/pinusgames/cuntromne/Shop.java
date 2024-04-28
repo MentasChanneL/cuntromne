@@ -92,7 +92,8 @@ public class Shop {
         parameter.add( new SlotParameter(15, "m4a1", 27, 0, 654) );
         parameter.add( new SlotParameter(16, "awp", 45, 0, 655) );
 
-        parameter.add( new SlotParameter(32, "usp", 3, 1, 651) );
+        parameter.add( new SlotParameter(30, "p250", 3, 1, 662) );
+        parameter.add( new SlotParameter(32, "usp", 5, 1, 651) );
         parameter.add( new SlotParameter(34, "deagle", 7, 1, 652) );
 
         parameter.add( new SlotParameter(48, "he", 4, 4, 656) );
@@ -105,14 +106,15 @@ public class Shop {
         Shop.parameters.put(menuCT, parameter);
 
         parameter = new ShopParameters( menuT );
-        parameter.add( new SlotParameter(15, "ak", 27, 0, 654) );
+        parameter.add( new SlotParameter(15, "ak", 27, 0, 653) );
         parameter.add( new SlotParameter(16, "awp", 45, 0, 655) );
 
         parameter.add( new SlotParameter(30, "glock", 3, 1, 650) );
+        parameter.add( new SlotParameter(32, "tec9", 5, 1, 663) );
         parameter.add( new SlotParameter(34, "deagle", 7, 1, 652) );
 
         parameter.add( new SlotParameter(48, "he", 4, 4, 656) );
-        parameter.add( new SlotParameter(50, "flash", 3, 3, 657) );
+        parameter.add( new SlotParameter(50, "flash", 2, 3, 657) );
         parameter.add( new SlotParameter(52, "smoke", 3, 5, 658) );
 
         parameter.add( new SlotParameter(36, "fakec4", 3, 6, 660) );

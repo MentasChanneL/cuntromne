@@ -5,10 +5,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pinusgames.cuntromne.Config;
@@ -18,11 +15,14 @@ import org.pinusgames.cuntromne.weapon.Explode;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public abstract class C4Data {
 
     public static Entity entity;
     public static Set<Entity> fakes = new HashSet<>();
+    public static UUID C4Handler = null;
+    public static final Set<UUID> defuses = new HashSet<>();
 
     public static ItemDisplay createC4(Location spawnPos) {
         Location copy = spawnPos.clone();
@@ -82,7 +82,7 @@ public abstract class C4Data {
 
         Location loc = C4Data.entity.getLocation();
         loc.getWorld().playSound(loc, "ctum:c4.explode", 100, 1);
-        loc.getWorld().playSound(loc, "ctum:c4.taunt" + (new Random().nextInt(3) + 1), 100, (float)(1 + Math.random() * 0.2));
+        loc.getWorld().playSound(loc, "ctum:c4.taunt" + (new Random().nextInt(3) + 1), 100, (float)(0.65 + Math.random() * 0.2));
         Location spawnPos = loc.clone();
         spawnPos.add(0, 4, 0);
         new Explode(spawnPos, 24, 2);
@@ -111,6 +111,34 @@ public abstract class C4Data {
             if(C4Data.fakes.contains( ent )) result = (ItemDisplay) ent;
             if(C4Data.entity.getUniqueId().equals( ent.getUniqueId() )) return (ItemDisplay) ent;
         }
+        return result;
+    }
+
+    public static Item dropC4(Location location) {
+        ItemStack c4 = new ItemStack(Material.SNOWBALL);
+        ItemMeta meta = c4.getItemMeta();
+        meta.setCustomModelData(2);
+        c4.setItemMeta(meta);
+        Item result = location.getWorld().dropItem(location, c4);
+        result.setCanMobPickup(false);
+        result.setInvulnerable(true);
+        result.setHealth(1000);
+        result.setPickupDelay(10);
+        C4Data.C4Handler = result.getUniqueId();
+        return result;
+    }
+
+    public static Item dropDefuse(Location location) {
+        ItemStack drop = new ItemStack(Material.SNOWBALL);
+        ItemMeta meta = drop.getItemMeta();
+        meta.setCustomModelData(3);
+        drop.setItemMeta(meta);
+        Item result = location.getWorld().dropItem(location, drop);
+        result.setCanMobPickup(false);
+        result.setInvulnerable(true);
+        result.setHealth(1000);
+        result.setPickupDelay(10);
+        C4Data.defuses.add( result.getUniqueId() );
         return result;
     }
 
