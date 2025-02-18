@@ -6,6 +6,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.c4.C4Data;
 import org.pinusgames.cuntromne.weapon.script.Script;
@@ -17,8 +18,9 @@ public class DefuseDefuse extends Script {
     @Override
     public void close() {
         super.close();
-        this.data.player.removePotionEffect(PotionEffectType.SLOW);
+        this.data.player.removePotionEffect(PotionEffectType.SLOWNESS);
         this.data.player.removePotionEffect(PotionEffectType.LEVITATION);
+        this.data.player.setVelocity(new Vector(0, 0, 0));
     }
 
     @Override
@@ -27,7 +29,7 @@ public class DefuseDefuse extends Script {
         if( this.frame == -1 ) {
             this.bomb = C4Data.getBomb( data.player.getLocation() );
             if(bomb == null) { close(); return false; }
-            this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, PotionEffect.INFINITE_DURATION, 10, false, false, false));
+            this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, PotionEffect.INFINITE_DURATION, 10, false, false, false));
             this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, PotionEffect.INFINITE_DURATION, 128, false, false, false));
             Round.setAB(this.data.player, Component.text(""));
             this.data.player.setCooldown(this.data.item.getType(), 11);

@@ -28,6 +28,7 @@ public class Timer {
             Player pl = Bukkit.getPlayer(player);
             if(pl == null) {
                 Bukkit.getScheduler().cancelTask(this.id);
+                return;
             }
             run.run();
         }, 1, interval).getTaskId();

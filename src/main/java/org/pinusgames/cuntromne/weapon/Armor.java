@@ -46,7 +46,7 @@ public class Armor {
 
         meta.setColor(color);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
-        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 10, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier(Cuntromne.key, 10, AttributeModifier.Operation.ADD_NUMBER));
         result.setItemMeta(meta);
         return result;
     }
@@ -57,7 +57,7 @@ public class Armor {
         meta.displayName(Component.text("клянусь, что отсосу маршу за сникерс. Прочитал? Выполняй. "));
         meta.setCustomModelData(2);
         meta.setColor(color);
-        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("armor", 0, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier(Cuntromne.key, 0, AttributeModifier.Operation.ADD_NUMBER));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
         armor.setItemMeta(meta);
         return armor;

@@ -315,10 +315,10 @@ public class Events implements Listener {
             }
             if(MaterialTags.dirt.contains(material)) {
                 location.getWorld().playSound(location, "ctum:bullet.default", 1, (float)(0.9 - Math.random() * 0.4));
-                location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 5, e.getHitBlock().getBlockData());
+                location.getWorld().spawnParticle(Particle.BLOCK, location, 5, e.getHitBlock().getBlockData());
                 return;
             }
-            location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 5, e.getHitBlock().getBlockData());
+            location.getWorld().spawnParticle(Particle.BLOCK, location, 5, e.getHitBlock().getBlockData());
             return;
         }
         if(e.getHitEntity() != null) {
@@ -335,7 +335,7 @@ public class Events implements Listener {
             if(damage < 0) damage = 0;
             LivingEntity live = (LivingEntity) victimEnt;
             live.getWorld().playSound(live.getEyeLocation(), "ctum:bullet.wood", 1, (float)(0.9 - Math.random() * 0.4));
-            live.getWorld().spawnParticle(Particle.BLOCK_CRACK, live.getLocation().add(0, 1, 0), 25, 0.25, 0.5, 0.25, Material.RED_CONCRETE.createBlockData());
+            live.getWorld().spawnParticle(Particle.BLOCK, live.getLocation().add(0, 1, 0), 25, 0.25, 0.5, 0.25, Material.RED_CONCRETE.createBlockData());
             live.setNoDamageTicks(0);
             live.damage(damage, Bukkit.getEntity( data.owner ));
         }
@@ -469,7 +469,7 @@ public class Events implements Listener {
         List<Block> list = new ArrayList<>(e.blockList());
         e.blockList().clear();
         for(Block i : list) {
-            i.getWorld().spawnParticle(Particle.BLOCK_CRACK, i.getLocation().add(0.5, 1, 0.5),20,0.25, 0.25, 0.25, i.getBlockData());
+            i.getWorld().spawnParticle(Particle.BLOCK, i.getLocation().add(0.5, 1, 0.5),20,0.25, 0.25, 0.25, i.getBlockData());
         }
     }
     @EventHandler
@@ -477,7 +477,7 @@ public class Events implements Listener {
         List<Block> list = new ArrayList<>(e.blockList());
         e.blockList().clear();
         for(Block i : list) {
-            i.getWorld().spawnParticle(Particle.BLOCK_CRACK, i.getLocation().add(0.5, 1, 0.5), 20, i.getBlockData());
+            i.getWorld().spawnParticle(Particle.BLOCK, i.getLocation().add(0.5, 1, 0.5), 20, i.getBlockData());
         }
     }
     @EventHandler
@@ -504,7 +504,7 @@ public class Events implements Listener {
             C4Data.dropC4(e.getPlayer().getEyeLocation());
         }
         if(PlayerData.get( e.getPlayer() ) != null && PlayerData.get( e.getPlayer() ).team != null) PlayerData.get( e.getPlayer() ).team.removeMember(e.getPlayer());
-        if(e.getPlayer().getInventory().getItem(6) != null && PlayerData.get(e.getPlayer()).team.id.equals("ct")) {
+        if(e.getPlayer().getInventory().getItem(6) != null && PlayerData.get( e.getPlayer() ).team != null && PlayerData.get(e.getPlayer()).team.id.equals("ct")) {
             C4Data.dropDefuse(e.getPlayer().getEyeLocation());
         }
         PlayerData.remove( e.getPlayer() );

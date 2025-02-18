@@ -19,6 +19,7 @@ import org.pinusgames.cuntromne.actions.Action;
 import org.pinusgames.cuntromne.actions.LostAction;
 import org.pinusgames.cuntromne.actions.WinAction;
 import org.pinusgames.cuntromne.donate.Knife;
+import org.pinusgames.cuntromne.utils.NBTEditor;
 import org.pinusgames.cuntromne.weapon.Armor;
 import org.pinusgames.cuntromne.weapon.C4;
 import org.pinusgames.cuntromne.weapon.Defuse;
@@ -100,6 +101,7 @@ public class Round {
 
     public static void newRound() {
         if(Bukkit.getOnlinePlayers().isEmpty()) return;
+        NBTEditor.clear();
         clearEntities();
         Bukkit.getScheduler().cancelTask( Round.schedulerTimer );
         bossbar.setVisible(true);
@@ -199,7 +201,7 @@ public class Round {
         player.setHealth(20);
         player.setAbsorptionAmount(20);
         player.clearActivePotionEffects();
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, PotionEffect.INFINITE_DURATION, 250, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 250, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 4, false, false));
     }
 
@@ -266,6 +268,7 @@ public class Round {
                 twin();
                 return;
             }
+            return;
         }
         Set<Player> tlist = Team.teamList.get("t").getAliveMembers();
         if(ctlist.isEmpty() && tlist.isEmpty()) {

@@ -42,7 +42,7 @@ public class MaterialTags {
             Material.CAVE_AIR,
             Material.VOID_AIR,
             Material.IRON_BARS,
-            Material.GRASS,
+            Material.SHORT_GRASS,
             Material.BARRIER,
             Material.GRAY_CARPET
     ) );

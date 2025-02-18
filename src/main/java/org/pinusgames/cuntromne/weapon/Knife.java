@@ -30,14 +30,14 @@ public class Knife implements WeaponActions{
 
     @Override
     public void intro(WeaponData data) {
-        data.player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-        data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, PotionEffect.INFINITE_DURATION, 255, false, false));
+        data.player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+        data.player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 255, false, false));
     }
 
     @Override
     public void outro(WeaponData data) {
-        data.player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-        data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, PotionEffect.INFINITE_DURATION, 250, false, false));
+        data.player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+        data.player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 250, false, false));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class Knife implements WeaponActions{
         ItemMeta meta = result.getItemMeta();
         meta.setCustomModelData(skin);
         meta.displayName(Component.text("ВТЫК").decoration(TextDecoration.ITALIC, false));
-        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("damag", 50, AttributeModifier.Operation.ADD_NUMBER));
+        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(Cuntromne.key, 50, AttributeModifier.Operation.ADD_NUMBER));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         result.setItemMeta(meta);
         int id = Cuntromne.getInstance().getWeaponID();

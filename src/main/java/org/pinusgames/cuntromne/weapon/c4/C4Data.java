@@ -42,6 +42,7 @@ public abstract class C4Data {
         spawnPos.getWorld().playSound(spawnPos, "ctum:c4.plant", 100, 1);
         spawnPos.getWorld().playSound(spawnPos, "ctum:c4.plant2", 1, 1);
         Round.bombTimer = 900;
+        C4Data.C4Handler = null;
         return entity;
     }
 

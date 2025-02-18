@@ -3,6 +3,7 @@ package org.pinusgames.cuntromne;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pinusgames.cuntromne.command.*;
@@ -19,9 +20,11 @@ public final class Cuntromne extends JavaPlugin {
     public HashMap<UUID, Projectile> projectiles = new HashMap<>();
     private static Cuntromne instance;
     private int WeaponID = 0;
+    public static NamespacedKey key;
 
     @Override
     public void onEnable() {
+        key = new NamespacedKey(this, "main");
         instance = this;
         Config.instance( Cuntromne.getInstance() );
         this.saveDefaultConfig();

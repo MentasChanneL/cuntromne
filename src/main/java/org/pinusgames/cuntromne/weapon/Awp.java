@@ -73,10 +73,10 @@ public class Awp implements WeaponActions{
                     Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(1), Duration.ofSeconds(1))
             ));
             data.player.playSound(data.player.getEyeLocation(), "ctum:boom", 1, 1);
-            data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, PotionEffect.INFINITE_DURATION, 30, false, false, false));
+            data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, PotionEffect.INFINITE_DURATION, 30, false, false, false));
             return;
         }
-        data.player.removePotionEffect(PotionEffectType.SLOW);
+        data.player.removePotionEffect(PotionEffectType.SLOWNESS);
     }
 
     @Override

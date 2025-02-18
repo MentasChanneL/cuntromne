@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import org.pinusgames.cuntromne.Round;
 import org.pinusgames.cuntromne.weapon.c4.C4Data;
 import org.pinusgames.cuntromne.weapon.script.Animations;
@@ -16,15 +17,16 @@ public class C4Plant extends Script {
     @Override
     public void close() {
         super.close();
-        this.data.player.removePotionEffect(PotionEffectType.SLOW);
+        this.data.player.removePotionEffect(PotionEffectType.SLOWNESS);
         this.data.player.removePotionEffect(PotionEffectType.LEVITATION);
+        this.data.player.setVelocity(new Vector(0, 0, 0));
     }
 
     @Override
     public boolean step() {
         if(!super.step()) return false;
         if( this.frame == -1 ) {
-            this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, PotionEffect.INFINITE_DURATION, 10, false, false, false));
+            this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, PotionEffect.INFINITE_DURATION, 10, false, false, false));
             this.data.player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, PotionEffect.INFINITE_DURATION, 128, false, false, false));
             this.skip = false;
             Round.setAB(this.data.player, Component.text(""));
